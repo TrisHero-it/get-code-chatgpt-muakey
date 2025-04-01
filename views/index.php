@@ -29,61 +29,61 @@
                                     $now = new DateTime("now", new DateTimeZone('Asia/Ho_Chi_Minh'));
                                     $createdAtPlus15 = clone $date;
                                     $createdAtPlus15->add(new DateInterval('PT15M')); // PT15M = Plus 15 Minutes
-                                    // if ($createdAtPlus15 <= $now) {
-                                    //     continue;
-                                    // } else {
+                                    if ($createdAtPlus15 <= $now) {
+                                        continue;
+                                    } else {
                                 ?>
-                                    <tr>
-                                        <th scope="row">
-                                            <div class="media align-items-center">
-                                                <?php
-                                                if (strpos(strtolower($item['subject']), 'chatgpt') !== false) {
-                                                ?>
-                                                    <a href="#" class="avatar rounded-circle mr-3">
-                                                        <img alt="Image placeholder" src="css/images/chatgpt.png">
-                                                    </a>
-                                                    <div class="media-body">
-                                                        <span class="mb-0 text-sm">Chat GPT</span>
-                                                    </div>
-                                                <?php
-                                                }
-                                                ?>
-                                            </div>
-                                        </th>
-                                        <td>
-                                            <span class="badge badge-dot mr-4">
-                                                <?php echo $item['to'][0]['address'] ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-dot mr-4">
-                                                <?php
-                                                preg_match('/\b\d{6}\b/', $item['subject'], $matches);
-                                                if (!empty($matches)) {
-                                                    echo $matches[0];
-                                                } else {
-                                                    echo "Không tìm thấy mã số.";
-                                                }
-                                                ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge badge-dot mr-4">
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
+                                        <tr>
+                                            <th scope="row">
+                                                <div class="media align-items-center">
+                                                    <?php
+                                                    if (strpos(strtolower($item['subject']), 'chatgpt') !== false) {
+                                                    ?>
+                                                        <a href="#" class="avatar rounded-circle mr-3">
+                                                            <img alt="Image placeholder" src="css/images/chatgpt.png">
+                                                        </a>
+                                                        <div class="media-body">
+                                                            <span class="mb-0 text-sm">Chat GPT</span>
+                                                        </div>
+                                                    <?php
+                                                    }
+                                                    ?>
+                                                </div>
+                                            </th>
+                                            <td>
                                                 <span class="badge badge-dot mr-4">
-                                                    <?php echo $date->format('d/m/Y H:i:s') ?>
+                                                    <?php echo $item['to'][0]['address'] ?>
                                                 </span>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="https://muakey.com/">muakey.com</a>
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-dot mr-4">
+                                                    <?php
+                                                    preg_match('/\b\d{6}\b/', $item['subject'], $matches);
+                                                    if (!empty($matches)) {
+                                                        echo $matches[0];
+                                                    } else {
+                                                        echo "Không tìm thấy mã số.";
+                                                    }
+                                                    ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-dot mr-4">
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge badge-dot mr-4">
+                                                        <?php echo $date->format('d/m/Y H:i:s') ?>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="https://muakey.com/">muakey.com</a>
+                                            </td>
+                                        </tr>
                                 <?php
-                                    // }
+                                    }
                                 }
                                 ?>
                             </tbody>
