@@ -27,7 +27,6 @@
                                     $response = json_decode($result, true);
                                     $response = $response['hydra:member'];
                                     foreach ($response as $item) {
-
                                         $date = new DateTime($item['createdAt'], new DateTimeZone('UTC'));
                                         $date->setTimezone(new DateTimeZone('Asia/Ho_Chi_Minh'));
                                         $now = new DateTime("now", new DateTimeZone('Asia/Ho_Chi_Minh'));
@@ -37,7 +36,6 @@
                                             continue;
                                         } else {
                                 ?>
-
                                             <tr>
                                                 <th scope="row">
                                                     <div class="media align-items-center">
@@ -45,7 +43,7 @@
                                                         if (strpos(strtolower($item['subject']), 'chatgpt') !== false) {
                                                         ?>
                                                             <a href="#" class="avatar rounded-circle mr-3">
-                                                                <img alt="Image placeholder" src="images/chatgpt.png">
+                                                                <img alt="Image placeholder" src="css/images/chatgpt.png">
                                                             </a>
                                                             <div class="media-body">
                                                                 <span class="mb-0 text-sm">Chat GPT</span>
@@ -57,7 +55,7 @@
                                                 </th>
                                                 <td>
                                                     <span class="badge badge-dot mr-4">
-                                                        <?php echo $item['from']['address'] ?>
+                                                        <?php echo $item['to']['address'] ?>
                                                     </span>
                                                 </td>
                                                 <td>
