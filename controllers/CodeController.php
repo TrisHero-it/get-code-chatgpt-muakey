@@ -35,12 +35,17 @@ class CodeController
 
         // Lấy kết quả
         $results = [];
+
         foreach ($curlHandles as $ch) {
             $results[] = curl_multi_getcontent($ch);  // Lấy kết quả của mỗi request
             curl_multi_remove_handle($multiHandle, $ch);  // Xóa handle
             curl_close($ch);  // Đóng handle cURL
         }
 
+        $results = array_merge(json_decode($results[0], true)['hydra:member'], json_decode($results[1], true)['hydra:member']);
+        usort($results, function ($a, $b) {
+            return strtotime($b['createdAt']) - strtotime($a['createdAt']);
+        });
         curl_multi_close($multiHandle);  // Đóng multi handle
 
         require_once "views/index.php";
