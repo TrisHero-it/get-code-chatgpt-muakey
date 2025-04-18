@@ -14,9 +14,9 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th scope="col">Phân loại</th>
-                                    <th scope="col">email</th>
-                                    <th scope="col">code</th>
-                                    <th scope="col">Users</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Code</th>
+                                    <th scope="col">Branch</th>
                                     <th scope="col">Thời gian</th>
                                     <th scope="col">Website</th>
                                 </tr>
@@ -37,13 +37,31 @@
                                             <th scope="row">
                                                 <div class="media align-items-center">
                                                     <?php
-                                                    if (strpos(strtolower($item['subject']), 'chatgpt') !== false) {
+                                                    if ($item['from']['name'] == 'ChatGPT' || $item['from']['name'] == 'Sora') {
                                                     ?>
                                                         <a href="#" class="avatar rounded-circle mr-3">
                                                             <img alt="Image placeholder" src="css/images/chatgpt.png">
                                                         </a>
                                                         <div class="media-body">
                                                             <span class="mb-0 text-sm">Chat GPT</span>
+                                                        </div>
+                                                    <?php
+                                                    } else if ($item['from']['name'] == 'Netflix') {
+                                                    ?>
+                                                        <a href="#" class="avatar rounded-circle mr-3">
+                                                            <img alt="Image placeholder" src="css/images/netflix.jpg">
+                                                        </a>
+                                                        <div class="media-body">
+                                                            <span class="mb-0 text-sm">Netflix</span>
+                                                        </div>
+                                                    <?php
+                                                    } else if ($item['from']['name'] == 'Perplexity') {
+                                                    ?>
+                                                        <a href="#" class="avatar rounded-circle mr-3">
+                                                            <img alt="Image placeholder" src="css/images/Perplexity-logo.png">
+                                                        </a>
+                                                        <div class="media-body">
+                                                            <span class="mb-0 text-sm">Perplexity</span>
                                                         </div>
                                                     <?php
                                                     }
@@ -56,19 +74,45 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge badge-dot mr-4">
+                                                <span class="badge badge-dot mr-4" style="color: green;">
                                                     <?php
-                                                    preg_match('/\b\d{6}\b/', $item['subject'], $matches);
-                                                    if (!empty($matches)) {
-                                                        echo $matches[0];
+                                                    if ($item['from']['name'] == 'Perplexity') {
+                                                        echo "<span id='code" . $item['@id'] . "'></span>";
+                                                    ?>
+
+                                                        <script>
+                                                            $.ajax({
+                                                                url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
+                                                                method: "GET",
+                                                                headers: {
+                                                                    "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDM2Njk3MTQsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoibWFuaGJpZ2F5QHB0Y3QubmV0IiwiaWQiOiI2N2VlM2IxYzQ0ZDU2Y2E0MTEwNzMwZDciLCJtZXJjdXJlIjp7InN1YnNjcmliZSI6WyIvYWNjb3VudHMvNjdlZTNiMWM0NGQ1NmNhNDExMDczMGQ3Il19fQ.a_i4rTY3qxmMuATGGhTmsulBluWqLukWrs1-s6_kN7zvXw40U8dlYqks8bj0p8SNmiF8Jqs5YQ_ykpUPR-azlg"
+                                                                },
+                                                                success: function(response) {
+                                                                    const tempDiv = $('<div>').html(response.html[0]);
+
+                                                                    // Lấy nội dung trong span
+                                                                    const code = tempDiv.find('span[style="line-height: 24px !important; font-size: 16px; font-size: 16px !important; white-space: pre-wrap;"]')
+                                                                        .text().trim();
+                                                                    document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = code;
+                                                                }
+                                                            });
+                                                        </script>
+
+                                                    <?php
                                                     } else {
-                                                        echo "Không tìm thấy mã số.";
+                                                        preg_match('/\b\d{6}\b/', $item['subject'], $matches);
+                                                        if (!empty($matches)) {
+                                                            echo $matches[0];
+                                                        } else {
+                                                            echo "<span style='color: red;'>Error</span>";
+                                                        }
                                                     }
                                                     ?>
                                                 </span>
                                             </td>
                                             <td>
                                                 <span class="badge badge-dot mr-4">
+                                                    <?php echo $item['from']['name'] ?>
                                                 </span>
                                             </td>
                                             <td>
