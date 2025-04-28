@@ -24,7 +24,13 @@ class CodeController
         "8591pink@ptct.net" => "%PI+]7P#4;",
         "jonisbetter@ptct.net" => '$U*[t*fD8,',
         "2653fit@ptct.net" => "2653fit@ptct.net",
-        "disgustedlorianne@ptct.net" => ":*J~ndFppu"
+        "disgustedlorianne@ptct.net" => ":*J~ndFppu",
+        "6devi@ptct.net" => "=CD=:3,.CH",
+        "charmianelectrical@ptct.net" => "VhNaqG/q&f",
+        "calypso840@ptct.net" => 'vPMA/cQ\("',
+        "1745nice@ptct.net" => '\o];n$p%65',
+        "448disturbing@ptct.net" => 'Y9\(=p{*SP',
+        '9444easy@chefalicious.com' => 'QsFo4pdP{/'
     ];
 
     const API_URL = "https://api.mail.tm/";

@@ -496,13 +496,29 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
 
                                                                                 if (match) {
                                                                                     document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `
-                                                                                    <a href="${match[1]}" class="btn btn-danger" target="_blank">Nhận mã</a>
+                                                                                    <a href="${match[1]}" class="btn btn-success" target="_blank">Nhận mã</a>
                                                                                 `;
                                                                                 } else {
-                                                                                    console.log("Không tìm thấy link sau 'Nhận mã'.");
+
                                                                                 }
                                                                             } else {
-                                                                                console.log("Không tìm thấy 'Nhận mã' trong text.");
+                                                                                const newIndex = text.indexOf("Đúng, đây là tôi");
+                                                                                if (newIndex !== -1) {
+                                                                                    // Cắt text từ "Nhận mã" trở đi
+                                                                                    const newSubText = text.substring(newIndex);
+
+                                                                                    // Tìm link trong đoạn mới
+                                                                                    const newMatch = newSubText.match(/\[(https?:\/\/.*?)\]/);
+
+                                                                                    if (newMatch) {
+                                                                                        document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `
+                                                                                    <a href="${newMatch[1]}" class="btn btn-danger" target="_blank">Đây là tôi</a>
+                                                                                `;
+                                                                                    } else {
+
+                                                                                    }
+                                                                                }
+
                                                                             }
 
                                                                         }
