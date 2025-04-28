@@ -97,37 +97,11 @@
                                                     <td>
                                                         <span class="badge badge-dot mr-4" style="color: green;">
                                                             <?php
-                                                            if ($item['from']['name'] == 'CapCut') {
-                                                                echo "<span id='code" . $item['@id'] . "'></span>";
-                                                            ?>
-                                                                <script>
-                                                                    $.ajax({
-                                                                        url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
-                                                                        method: "GET",
-                                                                        headers: {
-                                                                            "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDM2Njk3MTQsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoibWFuaGJpZ2F5QHB0Y3QubmV0IiwiaWQiOiI2N2VlM2IxYzQ0ZDU2Y2E0MTEwNzMwZDciLCJtZXJjdXJlIjp7InN1YnNjcmliZSI6WyIvYWNjb3VudHMvNjdlZTNiMWM0NGQ1NmNhNDExMDczMGQ3Il19fQ.a_i4rTY3qxmMuATGGhTmsulBluWqLukWrs1-s6_kN7zvXw40U8dlYqks8bj0p8SNmiF8Jqs5YQ_ykpUPR-azlg"
-                                                                        },
-                                                                        success: function(response) {
-                                                                            const htmlContent = response.html[0];
-                                                                            const parser = new DOMParser();
-                                                                            const doc = parser.parseFromString(htmlContent, 'text/html');
-                                                                            const p = doc.querySelector('p[style="margin-bottom:20px;color:#16161d;font-weight:600"]');
-                                                                            if (p) {
-                                                                                const number = p.textContent.trim().match(/\d+/)[0];
-                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = number;
-                                                                            }
-                                                                        }
-                                                                    });
-                                                                </script>
-
-                                                            <?php
+                                                            preg_match('/\b\d{6}\b/', $item['subject'], $matches);
+                                                            if (!empty($matches)) {
+                                                                echo $matches[0];
                                                             } else {
-                                                                preg_match('/\b\d{6}\b/', $item['subject'], $matches);
-                                                                if (!empty($matches)) {
-                                                                    echo $matches[0];
-                                                                } else {
-                                                                    echo "<span style='color: red;'>Error</span>";
-                                                                }
+                                                                echo "<span style='color: red;'>Error</span>";
                                                             }
                                                             ?>
                                                         </span>
@@ -197,43 +171,43 @@ $arrAccount = [
     'Ngonhanhaka16381@gmail.com' => [
         'password' => "Muakeydaco1223"
     ],
-    'Ngovangakq16291@gmail.com' => [
+    'ngovangakq16291@gmail.com' => [
         'password' => "Muakey1210"
     ],
-    'Ngoductrung1618@gmail.com' => [
+    'ngoductrung1618@gmail.com' => [
         'password' => "Muakey2201"
     ],
-    'Dangdung6817@gmail.com' => [
+    'dangdung6817@gmail.com' => [
         'password' => "Muakey001@@"
     ],
-    'Tandung61048@gmail.com' => [
+    'tandung61048@gmail.com' => [
         'password' => "Muakey220306"
     ],
-    'Ngominhgia826363@gmail.com' => [
+    'ngominhgia826363@gmail.com' => [
         'password' => "Muakey22323160"
     ],
-    'Phanbaovt16291@gmail.com' => [
+    'phanbaovt16291@gmail.com' => [
         'password' => "Muakey22323160"
     ],
-    'Haduc8197@gmail.com' => [
+    'haduc8197@gmail.com' => [
         'password' => "Muakey22360"
     ],
-    'Hongtran61040@gmail.com' => [
+    'hongtran61040@gmail.com' => [
         'password' => "Muakey2236131"
     ],
-    'Ngohoang827363@gmail.com' => [
+    'ngohoang827363@gmail.com' => [
         'password' => "Muakey236@613$%"
     ],
-    'Ngoanhquan82736@gmail.com' => [
+    'ngoanhquan82736@gmail.com' => [
         'password' => 'Mlaidh234e9#1f'
     ],
-    'Ngotuanbin7263@gmail.com' => [
+    'ngotuanbin7263@gmail.com' => [
         'password' => '019()!ndkanjcnc'
     ],
-    'Ngoanhluc98273@gmail.com' => [
+    'ngoanhluc98273@gmail.com' => [
         'password' => '&!*$nfkdknhakfnl'
     ],
-    'Ngohoan72636vs@gmail.com' => [
+    'ngohoan72636vs@gmail.com' => [
         'password' => '218930dkakdE!#'
     ],
     'vutruongsinh329599@gmail.com' => [

@@ -17,27 +17,31 @@ class CodeController
         "819twyla@ptct.net" => "Owp9y67Ma|",
         "babbie50@ptct.net" => "babbie50@ptct.net",
         "481level@ptct.net" => "f%wDUgchm~",
-        "aquamarineharriott@ptct.net"=> "=65HG%ui<\ ",
+        "aquamarineharriott@ptct.net" => "=65HG%ui<\ ",
         "rubina24@ptct.net" => "4)arh'r8Sp",
         "1240competent@ptct.net" => 'IJS:^b"X:R',
-        "4549jeana@ptct.net"=> ")3vcqHkN'3",
+        "4549jeana@ptct.net" => ")3vcqHkN'3",
         "8591pink@ptct.net" => "%PI+]7P#4;",
         "jonisbetter@ptct.net" => '$U*[t*fD8,',
         "2653fit@ptct.net" => "2653fit@ptct.net",
         "disgustedlorianne@ptct.net" => ":*J~ndFppu"
-        ];
+    ];
 
     const API_URL = "https://api.mail.tm/";
     public function index()
     {
         $multiHandle = curl_multi_init();  // Khởi tạo handle multi
         if (isset($_GET['email'])) {
-            $data = [
-                'address' => $_GET['email'],
-                'password' => trim(self::ACCOUNTS[$_GET['email']])
-            ];
-            $token = $this->getToken($data);
-            $token = json_decode($token)->token ?? self::TOKEN;
+            if (isset(self::ACCOUNTS[$_GET['email']])) {
+                $data = [
+                    'address' => $_GET['email'],
+                    'password' => trim(self::ACCOUNTS[$_GET['email']])
+                ];
+                $token = $this->getToken($data);
+                $token = json_decode($token)->token ?? self::TOKEN;
+            } else {
+                $token = self::TOKEN;
+            }
         } else {
             $token = self::TOKEN;
         }
