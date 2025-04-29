@@ -132,142 +132,6 @@
     </div>
 </div>
 
-<?php
-
-$arrAccount = [
-    "ngotuanbin7263@gmail.com" => [
-        'password' => "019()!ndkanjcnc"
-    ],
-    'colormy1991@gmail.com' => [
-        'password' => "Muakey123@"
-    ],
-    'Namdng9414@gmail.com' => [
-        'password' => "Muakey.com123"
-    ],
-    'duyhuynhdrag@gmail.com' => [
-        'password' => "Muakey2210"
-    ],
-    '60chinguyen@gmail.com' => [
-        'password' => "123456Abc@@"
-    ],
-    '2001nhoemnam@gmail.com' => [
-        'password' => "123456Abc@@"
-    ],
-    '2002nhoemnam@gmail.com' => [
-        'password' => "123456Abc@@"
-    ],
-    'nhoxdenkg@gmail.com' => [
-        'password' => "Muakey2201@@"
-    ],
-    'hitoriookami2506@gmail.com' => [
-        'password' => "Muakeycom2210"
-    ],
-    'nguyenhuyen818030@gmail.com' => [
-        'password' => "Muakey2233"
-    ],
-    'Ngovanphongagja1628@gmail.com' => [
-        'password' => "Muakey12039"
-    ],
-    'Ngonhanhaka16381@gmail.com' => [
-        'password' => "Muakeydaco1223"
-    ],
-    'ngovangakq16291@gmail.com' => [
-        'password' => "Muakey1210"
-    ],
-    'ngoductrung1618@gmail.com' => [
-        'password' => "Muakey2201"
-    ],
-    'dangdung6817@gmail.com' => [
-        'password' => "Muakey001@@"
-    ],
-    'tandung61048@gmail.com' => [
-        'password' => "Muakey220306"
-    ],
-    'ngominhgia826363@gmail.com' => [
-        'password' => "Muakey22323160"
-    ],
-    'phanbaovt16291@gmail.com' => [
-        'password' => "Muakey22323160"
-    ],
-    'haduc8197@gmail.com' => [
-        'password' => "Muakey22360"
-    ],
-    'hongtran61040@gmail.com' => [
-        'password' => "Muakey2236131"
-    ],
-    'ngohoang827363@gmail.com' => [
-        'password' => "Muakey236@613$%"
-    ],
-    'ngoanhquan82736@gmail.com' => [
-        'password' => 'Mlaidh234e9#1f'
-    ],
-    'ngotuanbin7263@gmail.com' => [
-        'password' => '019()!ndkanjcnc'
-    ],
-    'ngoanhluc98273@gmail.com' => [
-        'password' => '&!*$nfkdknhakfnl'
-    ],
-    'ngohoan72636vs@gmail.com' => [
-        'password' => '218930dkakdE!#'
-    ],
-    'vutruongsinh329599@gmail.com' => [
-        'password' => "Muakey22103@!"
-    ],
-    'hovietson170245@gmail.com' => [
-        'password' => "Muakey221sd03@!"
-    ],
-    'dovienphuong575030@gmail.com' => [
-        'password' => "Muakey22103@!312s"
-    ],
-    'vungoclan963035@gmail.com' => [
-        'password' => "Muakey22103@!31"
-    ],
-    'phanducanh263437@gmail.com' => [
-        'password' => "Muakey22103@!sdasa"
-    ],
-    'trantrihuu828317@gmail.com' => [
-        'password' => "Muakey22103@!sas"
-    ],
-    'vuhuucanh436054@gmail.com' => [
-        'password' => "Muakey236@635"
-    ],
-    'dominhhung482722@gmail.com' => [
-        'password' => "Muakey22103@!312s"
-    ],
-    'nguyenquocquang129941@gmail.com' => [
-        'password' => "Muakey22103@!312s"
-    ],
-    'legiaanh324893@gmail.com' => [
-        'password' => "muakey976"
-    ],
-    'lygiacan318307@gmail.com' => [
-        'password' => "789010123"
-    ],
-    'tranhuutri807128@gmail.com' => [
-        'password' => "khongbietmatkhau"
-    ],
-    'lybaotin653344@gmail.com' => [
-        'password' => "skydomdom78"
-    ],
-    'phamkhactrong774656@gmail.com' => [
-        'password' => "j97rack"
-    ],
-    '6879only@edny.net' => [
-        'password' => "123456"
-    ],
-    'thihai328071@gmail.com' => [
-        'password' => "Muakey123@@"
-    ],
-    'chuyytb20@gmail.com' => [
-        'password' => "123456Abc@@"
-    ],
-    'domai27977@gmail.com' => [
-        'password' => "Muakey2210@"
-    ],
-];
-
-?>
-
 <div class="main-content">
     <div class="container mt-5">
         <!-- Table -->
@@ -363,7 +227,9 @@ $arrAccount = [
                                                     <td>
                                                         <div class="d-flex align-items-center">
                                                             <span class="badge badge-dot mr-4" style="color: red;">
-                                                                <?php echo $arrAccount[$item['to'][0]['address']]['password'] ?>
+                                                                <?php if ($accountCapcut != null) {
+                                                                    echo $accountCapcut['password'];
+                                                                } ?>
                                                             </span>
                                                         </div>
                                                     </td>

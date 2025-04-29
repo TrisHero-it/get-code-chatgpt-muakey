@@ -16,9 +16,33 @@
 <body>
     <?php
     require_once 'controllers/CodeController.php';
-
+    require_once 'controllers/AccountController.php';
     $codeController = new CodeController();
-    $codeController->index();
+
+    if (isset($_GET['act'])) {
+        $accountController = new AccountController();
+        $ip = $codeController->getClientIP();
+        if ($ip == '1.54.23.12') {
+        switch ($_GET['act']) {
+            case 'add':
+                $accountController->add();
+                break;
+            case 'store':
+                $accountController->store();
+                break;
+            case 'delete':
+                $accountController->delete($_GET['id']);
+                break;
+            default:
+                $accountController->index();
+                break;
+        }
+        } else {
+            $codeController->index();
+        }
+    } else {
+        $codeController->index();
+    }
 
     ?>
 </body>
