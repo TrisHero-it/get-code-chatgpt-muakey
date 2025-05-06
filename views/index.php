@@ -76,7 +76,7 @@
                                         if ($createdAtPlus15 <= $now) {
                                             continue;
                                         } else {
-                                            if (($item['from']['name'] == 'ChatGPT' || $item['from']['name'] == 'Sora') && $item['to'][0]['address'] == $email) {
+                                            if (($item['from']['name'] != 'Netflix' && $item['from']['name'] != 'CapCut') && $item['to'][0]['address'] == $email) {
                                     ?>
                                                 <tr>
                                                     <th scope="row">
@@ -136,7 +136,6 @@
     <div class="container mt-5">
         <!-- Table -->
         <div class="row">
-
             <div class="col">
                 <div class="card shadow">
                     <div class="card-header border-0">

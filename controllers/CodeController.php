@@ -25,7 +25,6 @@ class CodeController extends Account
             $token = self::TOKEN;
         }
         $url = self::API_URL . "messages";
-
         // Tạo cURL cho mỗi token
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
