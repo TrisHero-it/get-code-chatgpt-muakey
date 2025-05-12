@@ -22,7 +22,7 @@
     if (isset($_GET['act'])) {
         $accountController = new AccountController();
         $ip = $codeController->getClientIP();
-        if ($ip == '1.54.23.12') {
+        if ($ip == '42.116.188.16') {
             switch ($_GET['act']) {
                 case 'add':
                     $accountController->add();

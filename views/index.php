@@ -166,7 +166,6 @@
                                             continue;
                                         } else {
                                             if (($item['from']['name'] == 'CapCut' && $item['to'][0]['address'] == $email)) {
-
                                     ?>
                                                 <tr>
                                                     <th scope="row">
@@ -209,7 +208,6 @@
                                                                         }
                                                                     });
                                                                 </script>
-
                                                             <?php
                                                             } else {
                                                                 preg_match('/\b\d{6}\b/', $item['subject'], $matches);
