@@ -101,7 +101,27 @@
                                                             if (!empty($matches)) {
                                                                 echo $matches[0];
                                                             } else {
-                                                                echo "<span style='color: red;'>Error</span>";
+                                                                echo "<span id='code" . $item['@id'] . "'></span>";
+                                                            ?>
+                                                                <script>
+                                                                    $.ajax({
+                                                                        url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
+                                                                        method: "GET",
+                                                                        headers: {
+                                                                            "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDM2Njk3MTQsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoibWFuaGJpZ2F5QHB0Y3QubmV0IiwiaWQiOiI2N2VlM2IxYzQ0ZDU2Y2E0MTEwNzMwZDciLCJtZXJjdXJlIjp7InN1YnNjcmliZSI6WyIvYWNjb3VudHMvNjdlZTNiMWM0NGQ1NmNhNDExMDczMGQ3Il19fQ.a_i4rTY3qxmMuATGGhTmsulBluWqLukWrs1-s6_kN7zvXw40U8dlYqks8bj0p8SNmiF8Jqs5YQ_ykpUPR-azlg"
+                                                                        },
+                                                                        success: function(response) {
+                                                                            const htmlContent = response.html[0];
+                                                                            const parser = new DOMParser();
+                                                                            const doc = parser.parseFromString(`<table>${htmlContent}</table>`, 'text/html');
+                                                                            const paragraphs = doc.querySelectorAll('td p');
+                                                                            const code = paragraphs[2].textContent.trim();
+                                                                            document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = code;
+                                                                            
+                                                                        }
+                                                                    });
+                                                                </script>
+                                                            <?php
                                                             }
                                                             ?>
                                                         </span>
