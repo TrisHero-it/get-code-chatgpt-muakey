@@ -17,26 +17,27 @@
     <?php
     require_once 'controllers/CodeController.php';
     require_once 'controllers/AccountController.php';
+    require_once 'vendor/autoload.php';
     $codeController = new CodeController();
 
     if (isset($_GET['act'])) {
         $accountController = new AccountController();
         $ip = $codeController->getClientIP();
         if ($ip == '42.116.188.16') {
-            switch ($_GET['act']) {
-                case 'add':
-                    $accountController->add();
-                    break;
-                case 'store':
-                    $accountController->store();
-                    break;
-                case 'delete':
-                    $accountController->delete($_GET['id']);
-                    break;
-                default:
-                    $accountController->index();
-                    break;
-            }
+        switch ($_GET['act']) {
+            case 'add':
+                $accountController->add();
+                break;
+            case 'store':
+                $accountController->store();
+                break;
+            case 'delete':
+                $accountController->delete($_GET['id']);
+                break;
+            default:
+                $accountController->index();
+                break;
+        }
         } else {
             $codeController->index();
         }

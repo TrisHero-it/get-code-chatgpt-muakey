@@ -34,18 +34,6 @@
                 </div>
             </div>
 
-            <?php
-            if (!isset($_GET['email'])) {
-            ?>
-                <script>
-                    setTimeout(function() {
-                        document.getElementById('click').click();
-                    }, 100);
-                </script>
-            <?php
-            }
-            ?>
-
         </div>
         <div class="row">
             <div class="col">
@@ -117,7 +105,7 @@
                                                                             const paragraphs = doc.querySelectorAll('td p');
                                                                             const code = paragraphs[2].textContent.trim();
                                                                             document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = code;
-                                                                            
+
                                                                         }
                                                                     });
                                                                 </script>
@@ -276,8 +264,6 @@
         </div>
     </div>
 </div>
-
-
 
 <?php
 if (!isset($_GET['email']) || $_GET['email'] == '') {

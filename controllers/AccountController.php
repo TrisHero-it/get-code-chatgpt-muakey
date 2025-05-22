@@ -1,4 +1,7 @@
 <?php
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 require_once "models/Account.php";
 
 class AccountController extends Account
@@ -18,7 +21,19 @@ class AccountController extends Account
     public function store()
     {
         $account = new Account();
-        $account->insert($_POST['email'], $_POST['password'], $_POST['type']);
+        if (isset($_FILES['excel_file'])) {
+            $fileTmpPath = $_FILES['excel_file']['tmp_name'];
+
+            $spreadsheet = IOFactory::load($fileTmpPath);
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray();
+
+            foreach ($data as $item) {
+                $account->insert($item[0], $item[1], "Netflix");
+            }
+        } else {
+            $account->insert($_POST['email'], $_POST['password'], $_POST['type']);
+        }
         header("Location: ?act=list");
     }
 
