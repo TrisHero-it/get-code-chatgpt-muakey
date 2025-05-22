@@ -17,12 +17,13 @@
     <?php
     require_once 'controllers/CodeController.php';
     require_once 'controllers/AccountController.php';
+    require_once 'vendor/autoload.php';
     $codeController = new CodeController();
 
     if (isset($_GET['act'])) {
         $accountController = new AccountController();
         $ip = $codeController->getClientIP();
-        if ($ip == '42.116.188.16') {
+        if ($ip == '1.54.23.203') {
             switch ($_GET['act']) {
                 case 'add':
                     $accountController->add();
