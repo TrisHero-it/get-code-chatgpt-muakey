@@ -29,4 +29,27 @@ class db
         }
         return $stmt->fetch();
     }
+
+    function getData2($query, $getAll = true)
+    {
+        $conn = $this->getConnect2();
+        $stmt = $conn->prepare($query);
+        $stmt->execute();
+        if ($getAll) {
+            return $stmt->fetchAll();
+        }
+        return $stmt->fetch();
+    }
+
+    function getConnect2()
+    {
+        $connect = new PDO(
+            "mysql:host=" . DBHOST2
+                . ";dbname=" . DBNAME2
+                . ";charset=" . DBCHARSET2,
+            DBUSER2,
+            DBPASS2
+        );
+        return $connect;
+    }
 }

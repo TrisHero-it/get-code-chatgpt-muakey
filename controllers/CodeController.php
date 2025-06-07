@@ -3,27 +3,34 @@ require_once "models/Account.php";
 
 class CodeController extends Account
 {
-    const TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NDM2Njk3MTQsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoibWFuaGJpZ2F5QHB0Y3QubmV0IiwiaWQiOiI2N2VlM2IxYzQ0ZDU2Y2E0MTEwNzMwZDciLCJtZXJjdXJlIjp7InN1YnNjcmliZSI6WyIvYWNjb3VudHMvNjdlZTNiMWM0NGQ1NmNhNDExMDczMGQ3Il19fQ.a_i4rTY3qxmMuATGGhTmsulBluWqLukWrs1-s6_kN7zvXw40U8dlYqks8bj0p8SNmiF8Jqs5YQ_ykpUPR-azlg";
 
     const API_URL = "https://api.mail.tm/";
     public function index()
     {
         $multiHandle = curl_multi_init();  // Khởi tạo handle multi
         if (isset($_GET['email'])) {
-            $account = new Account();
-            $accountCapcut = $account->getAccountByEmailAndType(strtolower($_GET['email']), 'CapCut');
-            $account = $account->getAccountByEmailAndType(strtolower($_GET['email']), 'Netflix');
+            $account2 = new Account();
+            $accountCapcut = $account2->getAccountByEmailAndType(strtolower($_GET['email']), 'CapCut');
+            $account = $account2->getAccountByEmailAndType(strtolower($_GET['email']), 'Netflix');
             if ($account != null) {
                 $data = [
                     'address' => $account['email'],
                     'password' => $account['password']
                 ];
                 $token = $this->getToken($data);
+                $token = isset($token) ? json_decode($token)->token : 1;
+            } else {
+                $token = 1;
+                $accountChatgpt = $account2->getAccountByEmailAndType2(strtolower($_GET['email']), 3);
+            
+                require_once "views/index.php";
+                exit;
             }
-            $token = isset($token) ? json_decode($token)->token : self::TOKEN;
         } else {
-            $token = self::TOKEN;
+            require_once "views/index.php";
+            exit;
         }
+
         $url = self::API_URL . "messages";
         // Tạo cURL cho mỗi token
         $ch = curl_init();

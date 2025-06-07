@@ -31,4 +31,10 @@ class Account extends db
         $query = "DELETE FROM accounts WHERE id = $id";
         $this->getData($query, false);
     }
+
+    public function getAccountByEmailAndType2($email, $category)
+    {
+        $query = "SELECT * FROM accounts WHERE email = '$email' AND category_id = '$category'";
+        return $this->getData2($query, false);
+    }
 }
