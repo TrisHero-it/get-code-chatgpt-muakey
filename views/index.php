@@ -2,7 +2,6 @@
     if ($token == 1) {
 ?>
         <script>
-            alert('Tài khoản chatgpt thì vui lòng truy cập website 2fa.muakey.com để lấy code');
             window.location.href = 'https://2fa.muakey.com/?id=<?php echo $accountChatgpt['code'] ?>';
         </script>;
 <?php

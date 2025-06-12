@@ -22,7 +22,10 @@ class CodeController extends Account
             } else {
                 $token = 1;
                 $accountChatgpt = $account2->getAccountByEmailAndType2(strtolower($_GET['email']), 3);
-            
+                if ($accountChatgpt == null) {
+                    echo "Không tìm thấy tài khoản";
+                    exit;
+                }
                 require_once "views/index.php";
                 exit;
             }

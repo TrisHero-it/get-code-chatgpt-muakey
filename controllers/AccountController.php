@@ -21,7 +21,7 @@ class AccountController extends Account
     public function store()
     {
         $account = new Account();
-        if (isset($_FILES['excel_file'])) {
+        if ($_FILES['excel_file']['name'] != '') {
             $fileTmpPath = $_FILES['excel_file']['tmp_name'];
 
             $spreadsheet = IOFactory::load($fileTmpPath);
