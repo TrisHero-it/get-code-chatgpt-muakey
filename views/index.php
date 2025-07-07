@@ -363,43 +363,16 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                                             "Authorization": "Bearer <?php echo $token ?>"
                                                                         },
                                                                         success: function(response) {
-                                                                            text = response.text;
-                                                                            const nhanMaIndex = text.indexOf("Nhận mã");
+                                                                            const html = response.html[0];
+                                                                            const parser = new DOMParser();
+                                                                            const doc = parser.parseFromString(html, 'text/html');
+                                                                            const aTag = doc.querySelector('a.h5[href*="netflix.com/account/travel/verify"]');
 
-                                                                            if (nhanMaIndex !== -1) {
-                                                                                // Cắt text từ "Nhận mã" trở đi
-                                                                                const subText = text.substring(nhanMaIndex);
-
-                                                                                // Tìm link trong đoạn mới
-                                                                                const match = subText.match(/\[(https?:\/\/.*?)\]/);
-
-                                                                                if (match) {
-                                                                                    document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `
-                                                                                    <a href="${match[1]}" class="btn btn-success" target="_blank">Nhận mã</a>
-                                                                                `;
-                                                                                } else {
-
-                                                                                }
+                                                                            if (aTag) {
+                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `<a class="btn btn-primary" href="${aTag.href}"> click here </a>`;
                                                                             } else {
-                                                                                const newIndex = text.indexOf("Đúng, đây là tôi");
-                                                                                if (newIndex !== -1) {
-                                                                                    // Cắt text từ "Nhận mã" trở đi
-                                                                                    const newSubText = text.substring(newIndex);
-
-                                                                                    // Tìm link trong đoạn mới
-                                                                                    const newMatch = newSubText.match(/\[(https?:\/\/.*?)\]/);
-
-                                                                                    if (newMatch) {
-                                                                                        document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `
-                                                                                    <a href="${newMatch[1]}" class="btn btn-danger" target="_blank">Đây là tôi</a>
-                                                                                `;
-                                                                                    } else {
-
-                                                                                    }
-                                                                                }
-
+                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `ERROR NOT FOUND`;
                                                                             }
-
                                                                         }
                                                                     });
                                                                 </script>
