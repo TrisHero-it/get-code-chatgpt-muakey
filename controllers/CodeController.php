@@ -10,7 +10,6 @@ class CodeController extends Account
         $multiHandle = curl_multi_init();  // Khởi tạo handle multi
         if (isset($_GET['email'])) {
             $account2 = new Account();
-            $accountCapcut = $account2->getAccountByEmailAndType(strtolower($_GET['email']), 'CapCut');
             $account = $account2->getAccountByEmailAndType(strtolower($_GET['email']), 'Netflix');
             if ($account != null) {
                 $data = [
@@ -74,7 +73,7 @@ class CodeController extends Account
 
     public function getToken(array $accounts)
     {
-        $url = 'https://api.mail.tm/token';
+        $url = 'https://api.mail.tm/token'; 
 
         // Dữ liệu cần gửi
         $data = [
