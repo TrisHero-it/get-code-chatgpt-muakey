@@ -62,7 +62,6 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
     <div class="container mt-5">
         <!-- Table -->
         <div class="row">
-
             <div class="col">
                 <div class="card shadow">
                     <div class="card-header border-0">
@@ -128,6 +127,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                             ?>
                                                         </span>
                                                     </td>
+
                                                     <th scope="row">
                                                         <div class="media align-items-center">
                                                             <a href="#" class="avatar rounded-circle mr-3">
@@ -146,8 +146,6 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                             </span>
                                                         </div>
                                                     </td>
-
-
 
                                                     <td>
                                                         <div class="d-flex align-items-center">

@@ -21,25 +21,53 @@
     $codeController = new CodeController();
 
     if (isset($_GET['act'])) {
+        // Xác thực HTTP Basic Authentication
+        $username = 'admin';
+        $password = 'Muakey@@111';
+
         $accountController = new AccountController();
-        $ip = $codeController->getClientIP();
-        if ($ip == '42.116.188.82' || $ip == '127.0.0.1') {
-            switch ($_GET['act']) {
-                case 'add':
-                    $accountController->add();
-                    break;
-                case 'store':
-                    $accountController->store();
-                    break;
-                case 'delete':
-                    $accountController->delete($_GET['id']);
-                    break;
-                default:
-                    $accountController->index();
-                    break;
-            }
-        } else {
-            $codeController->index();
+        switch ($_GET['act']) {
+            case 'add':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $accountController->add();
+                break;
+            case 'store':
+                $accountController->store();
+                break;
+            case 'delete':
+                $accountController->delete($_GET['id']);
+                break;
+            case 'list':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $accountController->index();
+                break;
+            default:
+                $codeController->index();
+                break;
         }
     } else {
         $codeController->index();
