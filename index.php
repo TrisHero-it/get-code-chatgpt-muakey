@@ -17,9 +17,11 @@
     <?php
     require_once 'controllers/CodeController.php';
     require_once 'controllers/AccountController.php';
+    require_once 'controllers/SteamController.php';
+    require_once 'controllers/OrderController.php';
     require_once 'vendor/autoload.php';
     $codeController = new CodeController();
-
+    $steamController = new SteamController();
     if (isset($_GET['act'])) {
         // Xác thực HTTP Basic Authentication
         $username = 'admin';
@@ -64,6 +66,253 @@
                     exit;
                 }
                 $accountController->index();
+                break;
+            case 'export':
+                $accountController->exportExcel();
+                break;
+
+            case "get-steam":
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $steamController->getOrders();
+                break;
+            case "update-steam":
+                $steamController->updateOrder($_GET['id'], $_GET['status']);
+                break;
+            case 'order-add':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->add();
+                break;
+            case 'order-store':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->store();
+                break;
+            case 'order-edit':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->edit($_GET['id']);
+                break;
+            case 'order-update':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->update();
+                break;
+            case 'orders':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->index();
+                break;
+            case 'order-delete':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->delete($_GET['id']);
+                break;
+            case 'order-delete-all':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->deleteAllExceptPending();
+                break;
+            case 'money-edit':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->editMoney();
+                break;
+            case 'money-update':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->updateMoneyData();
+                break;
+            case 'payment-codes-add':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->addPaymentCodes();
+                break;
+            case 'payment-codes-store':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->storePaymentCodes();
+                break;
+            case 'payment-codes-list':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->listPaymentCodes();
+                break;
+            case 'payment-codes-delete-all':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->deleteAllPaymentCodes();
+                break;
+            case 'payment-code-delete':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $orderController = new OrderController();
+                $orderController->deletePaymentCode($_GET['id']);
                 break;
             default:
                 $codeController->index();

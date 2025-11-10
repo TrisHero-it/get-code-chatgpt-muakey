@@ -21,6 +21,10 @@
         <div class="form-group mt-3">
             <input class="form-control" type="file" name="excel_file" accept=".xlsx, .xls">
         </div>
-        <button type="submit" class="btn btn-primary mt-3">Thêm</button>
+
+        <div class="d-flex" style="gap: 8px">
+            <button type="submit" class="btn btn-primary mt-3">Thêm</button>
+            <a href="?act=export" class="btn btn-success mt-3">Xuất Excel mẫu</a>
+        </div>
     </form>
 </div>
