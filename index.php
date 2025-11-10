@@ -65,6 +65,9 @@
                 }
                 $accountController->index();
                 break;
+            case 'export':
+                $accountController->exportExcel();
+                break;
             default:
                 $codeController->index();
                 break;
