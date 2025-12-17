@@ -10,28 +10,35 @@
     <?php endif; ?>
     <form action="?act=order-store" method="post" id="orderForm">
         <div class="form-group mt-3">
+            <label for="order_data">Dán thông tin đơn hàng <span class="text-muted">(Tùy chọn)</span></label>
+            <textarea class="form-control" id="order_data" name="order_data" rows="6"
+                placeholder="Dán thông tin đơn hàng vào đây (ví dụ:&#10;Mã đơn hàng: 798163&#10;Tên sản phẩm: Chuyển vùng Steam nạp USD x 1&#10;Mã backup Steam: 3JQYY66 XRXFPD7 7RTCTH7&#10;Tài khoản Steam cần chuyển: ThoaiThanh2112&#10;Mật Khẩu Steam cần chuyển: thanhtang99+&#10;Ngày mua: 15:08:04 18/12/2025)"></textarea>
+            <small class="form-text text-muted">Hệ thống sẽ tự động nhận diện Mã đơn hàng, Username và Password từ thông tin bạn dán.</small>
+        </div>
+
+        <div class="form-group mt-3">
             <label for="order_id">Mã đơn hàng <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="order_id" name="order_id" placeholder="Nhập mã đơn hàng" required>
+            <input type="text" class="form-control" id="order_id" name="order_id" placeholder="Nhập mã đơn hàng hoặc dán thông tin ở trên" required>
         </div>
         <div class="form-group mt-3">
             <label for="customer_name">Username <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="username" name="username" placeholder="Nhập username" required>
+            <input type="text" class="form-control" id="username" name="username" placeholder="Nhập username hoặc dán thông tin ở trên" required>
         </div>
         <div class="form-group mt-3">
             <label for="customer_email">Password <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="password" name="password" placeholder="Nhập password" required>
+            <input type="text" class="form-control" id="password" name="password" placeholder="Nhập password hoặc dán thông tin ở trên" required>
         </div>
         <div class="form-group mt-3">
-            <label for="backup_steam">Mã backup steam <span class="text-muted">(Tùy chọn)</span></label>
+            <label for="backup_steam">Mã backup steam <span class="text-muted">(Tùy chọn - từ 1 đến 3 mã, mỗi mã 7 ký tự)</span></label>
             <input type="text"
                 class="form-control"
                 id="backup_steam"
                 name="backup_code"
-                placeholder="Nhập mã backup steam (7 ký tự)"
-                maxlength="7">
-            <small class="form-text text-muted">Nếu nhập mã backup steam thì phải có đúng 7 ký tự (khoảng trắng sẽ tự động bị loại bỏ)</small>
+                placeholder="Nhập mã backup steam (ví dụ: 3JQYY66 hoặc 3JQYY66 XRXFPD7 7RTCTH7)"
+                maxlength="23">
+            <small class="form-text text-muted">Có thể nhập từ 1 đến 3 mã backup steam, mỗi mã 7 ký tự, cách nhau bởi khoảng trắng (khoảng trắng sẽ tự động bị loại bỏ)</small>
             <div class="invalid-feedback">
-                Mã backup steam phải có đúng 7 ký tự hoặc để trống.
+                Mã backup steam phải có từ 1 đến 3 mã, mỗi mã đúng 7 ký tự.
             </div>
         </div>
 
@@ -44,9 +51,59 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const orderDataTextarea = document.getElementById('order_data');
+        const orderIdInput = document.getElementById('order_id');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const backupInput = document.getElementById('backup_steam');
+
+        // Hàm parse thông tin đơn hàng từ textarea
+        function parseOrderData(text) {
+            const result = {
+                order_id: '',
+                username: '',
+                password: ''
+            };
+
+            // Parse Mã đơn hàng: "Mã đơn hàng: 798163"
+            const orderIdMatch = text.match(/Mã đơn hàng:\s*(\d+)/i);
+            if (orderIdMatch) {
+                result.order_id = orderIdMatch[1].trim();
+            }
+
+            // Parse Username: "Tài khoản Steam cần chuyển: ThoaiThanh2112"
+            const usernameMatch = text.match(/Tài khoản Steam:\s*(.+?)(?:\n|$)/i);
+            if (usernameMatch) {
+                result.username = usernameMatch[1].trim();
+            }
+
+            // Parse Password: "Mật Khẩu Steam cần chuyển: thanhtang99+"
+            const passwordMatch = text.match(/Mật Khẩu Steam:\s*(.+?)(?:\n|$)/i);
+            if (passwordMatch) {
+                result.password = passwordMatch[1].trim();
+            }
+
+            return result;
+        }
+
+        // Xử lý khi thay đổi textarea
+        orderDataTextarea.addEventListener('input', function() {
+            const text = this.value;
+            if (text.trim()) {
+                const parsed = parseOrderData(text);
+
+                // Điền vào các input
+                if (parsed.order_id) {
+                    orderIdInput.value = parsed.order_id;
+                }
+                if (parsed.username) {
+                    usernameInput.value = parsed.username;
+                }
+                if (parsed.password) {
+                    passwordInput.value = parsed.password;
+                }
+            }
+        });
 
         // Xử lý trim khoảng trắng đầu cuối cho username và password
         function trimInput(input) {
@@ -76,30 +133,32 @@
             trimInput(this);
         });
 
-        // Xử lý khi paste - tự động bỏ khoảng trắng
-        backupInput.addEventListener('paste', function(e) {
-            e.preventDefault();
-            let pastedText = (e.clipboardData || window.clipboardData).getData('text');
-            // Bỏ tất cả khoảng trắng
-            pastedText = pastedText.replace(/\s/g, '');
-            // Chỉ lấy 7 ký tự đầu tiên
-            pastedText = pastedText.substring(0, 7);
-            this.value = pastedText;
-
-            // Trigger input event để validate
-            this.dispatchEvent(new Event('input'));
-        });
-
-        // Xử lý khi nhập - tự động bỏ khoảng trắng
+        // Xử lý khi nhập backup code - cho phép từ 1-3 mã, mỗi mã 7 ký tự
         backupInput.addEventListener('input', function(e) {
             // Bỏ tất cả khoảng trắng
             let value = this.value.replace(/\s/g, '');
-            // Chỉ cho phép 7 ký tự
-            value = value.substring(0, 7);
-            this.value = value;
 
-            // Validate và hiển thị feedback
-            if (this.value.length === 7) {
+            // Chia thành các mã 7 ký tự
+            const codes = [];
+            for (let i = 0; i < value.length; i += 7) {
+                const code = value.substring(i, i + 7);
+                if (code.length === 7) {
+                    codes.push(code);
+                }
+            }
+
+            // Chỉ cho phép tối đa 3 mã
+            if (codes.length > 3) {
+                codes.splice(3);
+            }
+
+            // Ghép lại với khoảng trắng
+            this.value = codes.join(' ');
+
+            // Validate: phải có từ 1-3 mã, mỗi mã đúng 7 ký tự
+            const isValid = codes.length >= 1 && codes.length <= 3 && codes.every(code => code.length === 7);
+
+            if (isValid && codes.length > 0) {
                 this.classList.remove('is-invalid');
                 this.classList.add('is-valid');
             } else if (this.value.length > 0) {
@@ -110,27 +169,20 @@
             }
         });
 
-        // Xử lý khi keypress - ngăn nhập khoảng trắng
-        backupInput.addEventListener('keypress', function(e) {
-            // Ngăn nhập khoảng trắng
-            if (e.key === ' ') {
-                e.preventDefault();
-            }
-        });
-
         // Validate khi submit form
         const form = backupInput.closest('form');
         form.addEventListener('submit', function(e) {
-            // Loại bỏ khoảng trắng một lần nữa trước khi validate
-            backupInput.value = backupInput.value.replace(/\s/g, '');
-
-            // Chỉ validate nếu có giá trị (không rỗng)
-            if (backupInput.value.length > 0 && backupInput.value.length !== 7) {
-                e.preventDefault();
-                backupInput.classList.add('is-invalid');
-                backupInput.focus();
-                alert('Mã backup steam phải có đúng 7 ký tự hoặc để trống!');
-                return false;
+            // Validate backup code
+            const backupValue = backupInput.value.replace(/\s/g, '');
+            if (backupValue.length > 0) {
+                // Kiểm tra có phải là bội số của 7 và từ 7 đến 21 ký tự (1-3 mã)
+                if (backupValue.length % 7 !== 0 || backupValue.length < 7 || backupValue.length > 21) {
+                    e.preventDefault();
+                    backupInput.classList.add('is-invalid');
+                    backupInput.focus();
+                    alert('Mã backup steam phải có từ 1 đến 3 mã, mỗi mã đúng 7 ký tự!');
+                    return false;
+                }
             }
         });
     });

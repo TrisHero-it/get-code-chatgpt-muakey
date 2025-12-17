@@ -19,9 +19,11 @@
     require_once 'controllers/AccountController.php';
     require_once 'controllers/SteamController.php';
     require_once 'controllers/OrderController.php';
+    require_once 'controllers/WwmOrderController.php';
     require_once 'vendor/autoload.php';
     $codeController = new CodeController();
     $steamController = new SteamController();
+    $wwmOrderController = new WwmOrderController();
     if (isset($_GET['act'])) {
         // Xác thực HTTP Basic Authentication
         $username = 'admin';
@@ -36,7 +38,6 @@
                     $_SERVER['PHP_AUTH_USER'] !== $username ||
                     $_SERVER['PHP_AUTH_PW'] !== $password
                 ) {
-
                     header('WWW-Authenticate: Basic realm="Admin Area"');
                     header('HTTP/1.0 401 Unauthorized');
                     echo '<h1>Unauthorized Access</h1>';
@@ -89,6 +90,127 @@
                 break;
             case "update-steam":
                 $steamController->updateOrder($_GET['id'], $_GET['status']);
+                break;
+            case 'wwm-order-add':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+
+                $wwmOrderController->add();
+                break;
+            case 'wwm-order-store':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $wwmOrderController->store();
+                break;
+            case 'wwm-orders':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $wwmOrderController->index();
+                break;
+            case 'wwm-order-edit':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $wwmOrderController->edit($_GET['id']);
+                break;
+            case 'wwm-order-update':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $wwmOrderController->updateFull();
+                break;
+            case 'wwm-order-delete':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $wwmOrderController->delete($_GET['id']);
+                break;
+            case 'wwm-order-delete-all':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $wwmOrderController->deleteAllExceptPending();
+                break;
+            case 'orders-dashboard':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                require_once "views/orders/dashboard.php";
                 break;
             case 'order-add':
                 if (

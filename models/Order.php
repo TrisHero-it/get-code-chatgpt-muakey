@@ -12,6 +12,27 @@ class Order extends db
         return $this->getData($query);
     }
 
+    public function getOrdersPaginated($page = 1, $perPage = 30)
+    {
+        $offset = ($page - 1) * $perPage;
+        $query = "SELECT * FROM orders ";
+        if (isset($_GET['status']) && $_GET['status'] != '') {
+            $query .= " WHERE status = '$_GET[status]'";
+        }
+        $query .= " ORDER BY id DESC LIMIT $perPage OFFSET $offset";
+        return $this->getData($query);
+    }
+
+    public function getTotalCount()
+    {
+        $query = "SELECT COUNT(*) as total FROM orders ";
+        if (isset($_GET['status']) && $_GET['status'] != '') {
+            $query .= " WHERE status = '$_GET[status]'";
+        }
+        $result = $this->getData($query, false);
+        return $result ? (int)$result['total'] : 0;
+    }
+
     public function checkOrderExists($order_id)
     {
         $pdo = $this->getConnect();
@@ -35,11 +56,18 @@ class Order extends db
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateOrder($id, $order_id, $username, $password, $backup_code)
+    public function updateOrder($id, $order_id, $username, $password, $backup_code, $status = null, $image_error = null)
     {
         $pdo = $this->getConnect();
-        $stmt = $pdo->prepare("UPDATE orders SET order_id = ?, username = ?, password = ?, backup_code = ? WHERE id = ?");
-        $stmt->execute([$order_id, $username, $password, $backup_code, $id]);
+
+        // Nếu status không được truyền vào (null), thì không cập nhật status
+        if ($status === null) {
+            $stmt = $pdo->prepare("UPDATE orders SET order_id = ?, username = ?, password = ?, backup_code = ?, image_error = ? WHERE id = ?");
+            $stmt->execute([$order_id, $username, $password, $backup_code, $image_error, $id]);
+        } else {
+            $stmt = $pdo->prepare("UPDATE orders SET order_id = ?, username = ?, password = ?, backup_code = ?, status = ?, image_error = ? WHERE id = ?");
+            $stmt->execute([$order_id, $username, $password, $backup_code, $status, $image_error, $id]);
+        }
     }
 
     public function delete($id)
@@ -57,8 +85,7 @@ class Order extends db
     public function getTotalMoney()
     {
         $query = "SELECT * FROM moneys WHERE balance >= 0.5 ORDER BY id ASC LIMIT 1";
-        $result = $this->getData($query, false);
-        return $result ? $result : null;
+        return $this->getData($query, false);
     }
 
     public function updateMoney($id, $balance, $code)
@@ -105,7 +132,7 @@ class Order extends db
 
     public function getNextAvailableCode()
     {
-        $query = "SELECT * FROM moneys WHERE balance >= 0.5 ORDER BY id ASC LIMIT 1";
+        $query = "SELECT * FROM moneys WHERE balance >= 1 ORDER BY id ASC LIMIT 1";
         $result = $this->getData($query, false);
         return $result ? $result : null;
     }

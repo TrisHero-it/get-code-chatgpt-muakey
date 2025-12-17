@@ -8,7 +8,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
-    <form action="?act=order-update" method="post" id="orderForm">
+    <form action="?act=order-update" method="post" id="orderForm" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($order['id'] ?? '') ?>">
         <div class="form-group mt-3">
             <label for="order_id">Mã đơn hàng <span class="text-danger">*</span></label>
@@ -35,6 +35,32 @@
             <div class="invalid-feedback">
                 Mã backup steam phải có đúng 7 ký tự hoặc để trống.
             </div>
+        </div>
+        <div class="form-group mt-3">
+            <label for="status">Trạng thái <span class="text-danger">*</span></label>
+            <select class="form-control" id="status" name="status">
+                <option value="">Trạng thái khác</option>
+                <option value="pending" <?php echo (isset($order['status']) && $order['status'] == 'pending') ? 'selected' : '' ?>>Đang chờ</option>
+                <option value="completed" <?php echo (isset($order['status']) && $order['status'] == 'completed') ? 'selected' : '' ?>>Hoàn thành</option>
+                <option value="cancelled" <?php echo (isset($order['status']) && $order['status'] == 'cancelled') ? 'selected' : '' ?>>Đã hủy</option>
+            </select>
+        </div>
+        <div class="form-group mt-3">
+            <label for="image_error">Image Error <span class="text-muted">(Tùy chọn)</span></label>
+            <?php if (!empty($order['image_error'])): ?>
+                <div class="mb-2">
+                    <img src="<?php echo htmlspecialchars($order['image_error']) ?>" alt="Image Error" style="max-width: 300px; max-height: 200px; border: 1px solid #ddd; border-radius: 4px;">
+                    <div class="mt-1">
+                        <small class="text-muted">Ảnh hiện tại: <?php echo htmlspecialchars(basename($order['image_error'])) ?></small>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <input type="file"
+                class="form-control"
+                id="image_error"
+                name="image_error"
+                accept="image/*">
+            <small class="form-text text-muted">Chọn file ảnh lỗi (có thể để trống, chỉ upload khi muốn thay đổi)</small>
         </div>
 
         <div class="d-flex" style="gap: 8px">

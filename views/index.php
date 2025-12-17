@@ -12,7 +12,7 @@
     <div class="container mt-5">
         <!-- Table -->
         <div class="d-flex justify-content-between">
-            <?php if (  ($_GET['email'])) {
+            <?php if (($_GET['email'])) {
                 $email = strtolower($_GET['email']);
             } ?>
             <h2 class="mb-5">Nhận code : <span style="color: red;"><?php echo $email ?? 'Vui lòng điền email để lấy code ' ?></span></h2>

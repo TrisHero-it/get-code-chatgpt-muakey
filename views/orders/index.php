@@ -25,6 +25,9 @@
             </div>
         </div>
         <div class="d-flex" style="gap: 8px; height: 42px;">
+            <a href="?act=orders-dashboard" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
             <a href="?act=order-add" class="btn btn-primary">Thêm đơn hàng</a>
             <a href="?act=order-delete-all"
                 onclick="return confirm('Bạn có chắc chắn muốn xóa TẤT CẢ đơn hàng ngoại trừ đơn đang chờ (pending)?\n\nHành động này không thể hoàn tác!')"
@@ -97,6 +100,11 @@
                         <td><?php echo isset($order['created_at']) ? date('d/m/Y H:i', strtotime($order['created_at'])) : 'N/A' ?></td>
                         <td>
                             <div class="d-flex" style="gap: 5px;">
+                                <?php if (!empty($order['image_error'])): ?>
+                                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#imageModal<?php echo $order['id'] ?>">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                <?php endif; ?>
                                 <a href="?act=order-edit&id=<?php echo $order['id'] ?>" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
@@ -110,6 +118,111 @@
             ?>
         </tbody>
     </table>
+
+    <!-- Phân trang -->
+    <?php if (isset($totalPages) && $totalPages > 1): ?>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-4">
+                <?php
+                $currentPage = isset($currentPage) ? $currentPage : (isset($_GET['page']) ? (int)$_GET['page'] : 1);
+                $statusParam = isset($_GET['status']) && $_GET['status'] != '' ? '&status=' . htmlspecialchars($_GET['status']) : '';
+
+                // Nút Previous
+                if ($currentPage > 1):
+                ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=orders&page=<?php echo $currentPage - 1 ?><?php echo $statusParam ?>">Trước</a>
+                    </li>
+                <?php else: ?>
+                    <li class="page-item disabled">
+                        <span class="page-link">Trước</span>
+                    </li>
+                <?php endif; ?>
+
+                <?php
+                // Hiển thị các số trang
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+
+                if ($startPage > 1):
+                ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=orders&page=1<?php echo $statusParam ?>">1</a>
+                    </li>
+                    <?php if ($startPage > 2): ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <li class="page-item <?php echo $i == $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="?act=orders&page=<?php echo $i ?><?php echo $statusParam ?>"><?php echo $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($endPage < $totalPages): ?>
+                    <?php if ($endPage < $totalPages - 1): ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <?php endif; ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=orders&page=<?php echo $totalPages ?><?php echo $statusParam ?>"><?php echo $totalPages ?></a>
+                    </li>
+                <?php endif; ?>
+
+                <!-- Nút Next -->
+                <?php if ($currentPage < $totalPages): ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=orders&page=<?php echo $currentPage + 1 ?><?php echo $statusParam ?>">Sau</a>
+                    </li>
+                <?php else: ?>
+                    <li class="page-item disabled">
+                        <span class="page-link">Sau</span>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+        <div class="text-center text-muted mb-3">
+            <small>Trang <?php echo $currentPage ?> / <?php echo $totalPages ?> (Tổng: <?php echo $totalCount ?> đơn hàng)</small>
+        </div>
+    <?php endif; ?>
 </div>
+
+<!-- Modals for Image Error -->
+<?php
+if (!empty($orders)) {
+    foreach ($orders as $order) {
+        if (!empty($order['image_error'])) {
+?>
+            <!-- Modal for Order ID <?php echo $order['id'] ?> -->
+            <div class="modal fade" id="imageModal<?php echo $order['id'] ?>" tabindex="-1" aria-labelledby="imageModalLabel<?php echo $order['id'] ?>" aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel<?php echo $order['id'] ?>">
+                                Image Error - Đơn hàng #<?php echo htmlspecialchars($order['order_id'] ?? $order['id']) ?>
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="<?php echo htmlspecialchars($order['image_error']) ?>"
+                                alt="Image Error"
+                                class="img-fluid"
+                                style="max-height: 70vh; border-radius: 4px;">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+<?php
+        }
+    }
+}
+?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

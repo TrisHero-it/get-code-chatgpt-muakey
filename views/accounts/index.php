@@ -3,7 +3,10 @@
         <h3>
             Danh sách tài khoản
         </h3>
-        <div class="d-flex" justify-content-between>
+        <div class="d-flex" style="gap: 8px;">
+            <a href="?act=orders-dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay về Dashboard
+            </a>
             <a href="?act=add" class="btn btn-primary">Thêm tài khoản</a>
             <select onchange="window.location.href = '?act=list&type=' + this.value" name="type" class="form-select" id="type">
                 <option value="">Tất cả</option>

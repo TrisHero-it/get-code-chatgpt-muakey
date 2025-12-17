@@ -4,7 +4,7 @@ class Steam extends db
 {
     public function getOrders()
     {
-        $query = "SELECT * FROM orders where status = 'pending'";
+        $query = "SELECT * FROM orders where status = 'pending' limit 1";
         return $this->getData($query);
     }
 
