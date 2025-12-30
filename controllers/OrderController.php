@@ -191,7 +191,7 @@ class OrderController extends Order
             }
 
             // Tạo thư mục uploads nếu chưa có
-            $uploadDir = 'uploads/error_images/';
+            $uploadDir = 'uploads/wwm-orders/';
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }

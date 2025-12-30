@@ -8,7 +8,13 @@
                 <i class="fas fa-home"></i> Dashboard
             </a>
             <a href="?act=wwm-order-add" class="btn btn-primary">Thêm wwm_order</a>
-            <select onchange="window.location.href = '?act=wwm-orders&category=' + this.value" name="category" class="form-select" id="category" style="width: auto;">
+            <select onchange="
+                var url = '?act=wwm-orders&category=' + this.value;
+                <?php if (isset($_GET['search_order_id']) && $_GET['search_order_id'] !== ''): ?>
+                    url += '&search_order_id=<?php echo urlencode($_GET['search_order_id']) ?>';
+                <?php endif; ?>
+                window.location.href = url;
+            " name="category" class="form-select" id="category" style="width: auto;">
                 <option value="">Tất cả category</option>
                 <?php if (!empty($categories)): ?>
                     <?php foreach ($categories as $cat): ?>
@@ -39,6 +45,37 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
+
+    <!-- Form tìm kiếm -->
+    <div class="card mt-3 mb-3">
+        <div class="card-body">
+            <form method="GET" action="?" class="d-flex gap-2 align-items-end">
+                <input type="hidden" name="act" value="wwm-orders">
+                <?php if (isset($_GET['category']) && $_GET['category'] !== ''): ?>
+                    <input type="hidden" name="category" value="<?php echo htmlspecialchars($_GET['category']) ?>">
+                <?php endif; ?>
+                <div class="flex-grow-1">
+                    <label for="search_order_id" class="form-label">Tìm kiếm theo Order ID</label>
+                    <input type="text"
+                        class="form-control"
+                        id="search_order_id"
+                        name="search_order_id"
+                        placeholder="Nhập Order ID để tìm kiếm..."
+                        value="<?php echo isset($_GET['search_order_id']) ? htmlspecialchars($_GET['search_order_id']) : '' ?>">
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                    <?php if (isset($_GET['search_order_id']) && $_GET['search_order_id'] !== ''): ?>
+                        <a href="?act=wwm-orders<?php echo isset($_GET['category']) && $_GET['category'] !== '' ? '&category=' . urlencode($_GET['category']) : '' ?>" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Xóa
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <table class="table mt-3">
         <thead>
@@ -147,6 +184,88 @@
             ?>
         </tbody>
     </table>
+
+    <!-- Phân trang -->
+    <?php if (isset($totalPages) && $totalPages > 1): ?>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-4">
+                <?php
+                $currentPage = isset($currentPage) ? $currentPage : (isset($_GET['page']) ? (int)$_GET['page'] : 1);
+
+                // Xây dựng query string để giữ lại các tham số filter
+                $queryParams = [];
+                if (isset($_GET['category']) && $_GET['category'] !== '') {
+                    $queryParams[] = 'category=' . urlencode($_GET['category']);
+                }
+                if (isset($_GET['search_order_id']) && $_GET['search_order_id'] !== '') {
+                    $queryParams[] = 'search_order_id=' . urlencode($_GET['search_order_id']);
+                }
+                $queryString = !empty($queryParams) ? '&' . implode('&', $queryParams) : '';
+
+                // Nút Trước
+                if ($currentPage > 1):
+                ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=wwm-orders&page=<?php echo $currentPage - 1 ?><?php echo $queryString ?>">Trước</a>
+                    </li>
+                <?php else: ?>
+                    <li class="page-item disabled">
+                        <span class="page-link">Trước</span>
+                    </li>
+                <?php endif; ?>
+
+                <?php
+                // Hiển thị số trang
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+
+                if ($startPage > 1):
+                ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=wwm-orders&page=1<?php echo $queryString ?>">1</a>
+                    </li>
+                    <?php if ($startPage > 2): ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                    <li class="page-item <?php echo $i == $currentPage ? 'active' : '' ?>">
+                        <a class="page-link" href="?act=wwm-orders&page=<?php echo $i ?><?php echo $queryString ?>"><?php echo $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <?php if ($endPage < $totalPages): ?>
+                    <?php if ($endPage < $totalPages - 1): ?>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <?php endif; ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=wwm-orders&page=<?php echo $totalPages ?><?php echo $queryString ?>"><?php echo $totalPages ?></a>
+                    </li>
+                <?php endif; ?>
+
+                <?php
+                // Nút Sau
+                if ($currentPage < $totalPages):
+                ?>
+                    <li class="page-item">
+                        <a class="page-link" href="?act=wwm-orders&page=<?php echo $currentPage + 1 ?><?php echo $queryString ?>">Sau</a>
+                    </li>
+                <?php else: ?>
+                    <li class="page-item disabled">
+                        <span class="page-link">Sau</span>
+                    </li>
+                <?php endif; ?>
+            </ul>
+        </nav>
+        <div class="text-center mt-2">
+            <small>Trang <?php echo $currentPage ?> / <?php echo $totalPages ?> (Tổng: <?php echo isset($totalCount) ? $totalCount : 0 ?> đơn hàng)</small>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Modals for Image -->

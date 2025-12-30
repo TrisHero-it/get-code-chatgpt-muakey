@@ -54,6 +54,12 @@ class WwmOrderController extends WwmOrder
             exit;
         }
 
+        // Validate UID phải có đúng 10 chữ số
+        if (!preg_match('/^\d{10}$/', $uid)) {
+            header("Location: ?act=wwm-order-add&error=" . urlencode('UID phải có đúng 10 chữ số! Ví dụ: 4059837621'));
+            exit;
+        }
+
         // Kiểm tra order_id đã tồn tại chưa
         $wwmOrder = new WwmOrder();
         if ($wwmOrder->checkOrderIdExists($order_id)) {
@@ -90,8 +96,10 @@ class WwmOrderController extends WwmOrder
             $result['order_id'] = trim($matches[1]);
         }
 
-        // Parse UID: "UID: User ID: 4033075547" hoặc "UID: 4033075547" hoặc "UID Once Human: 154191896"
-        if (preg_match('/UID:.*?User ID:\s*(\d+)/i', $text, $matches)) {
+        // Parse UID: "Character ID Where Winds Meet: 4039549251" hoặc "UID: User ID: 4033075547" hoặc "UID: 4033075547" hoặc "UID Once Human: 154191896"
+        if (preg_match('/Character ID Where Winds Meet:\s*(\d+)/i', $text, $matches)) {
+            $result['uid'] = trim($matches[1]);
+        } elseif (preg_match('/UID:.*?User ID:\s*(\d+)/i', $text, $matches)) {
             $result['uid'] = trim($matches[1]);
         } elseif (preg_match('/UID Once Human:\s*(\d+)/i', $text, $matches)) {
             $result['uid'] = trim($matches[1]);
@@ -185,10 +193,27 @@ class WwmOrderController extends WwmOrder
         if ($category === null) {
             $category = isset($_GET['category']) && $_GET['category'] !== '' ? $_GET['category'] : null;
         }
-        $wwmOrders = $wwmOrder->index($category);
+
+        // Lấy search order_id từ GET
+        $searchOrderId = isset($_GET['search_order_id']) && $_GET['search_order_id'] !== '' ? trim($_GET['search_order_id']) : null;
+
+        // Phân trang
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $perPage = 30;
+        $totalCount = $wwmOrder->getTotalCount($category, $searchOrderId);
+        $totalPages = ceil($totalCount / $perPage);
+
+        // Đảm bảo page hợp lệ
+        if ($page < 1) $page = 1;
+        if ($page > $totalPages && $totalPages > 0) $page = $totalPages;
+
+        $wwmOrders = $wwmOrder->getOrdersPaginated($page, $perPage, $category, $searchOrderId);
 
         // Lấy danh sách categories để hiển thị trong dropdown
         $categories = $wwmOrder->getCategories();
+
+        // Truyền biến phân trang vào view
+        $currentPage = $page;
 
         require_once "views/orders/index-wwm-order.php";
     }

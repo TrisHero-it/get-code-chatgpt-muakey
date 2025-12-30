@@ -19,8 +19,8 @@
         <div class="form-group mt-3">
             <label for="order_data">Dán thông tin đơn hàng <span class="text-danger">*</span></label>
             <textarea class="form-control" id="order_data" name="order_data" rows="6"
-                placeholder="Dán thông tin đơn hàng vào đây (ví dụ:&#10;Mã đơn hàng: 797741&#10;Tên sản phẩm: 6000 Echo Beads Where Winds Meet x 1&#10;Tên nhân vật: ToVinhXuy&#10;UID: User ID: 4033075547&#10;Ngày mua: 09:52:26 18/12/2025&#10;&#10;Hoặc One Human:&#10;Mã đơn hàng: 816315&#10;Tên sản phẩm: 2340 Crystgin Once Human Chỉ Cần ID x 1&#10;UID Once Human: 154191896&#10;Sever Once Human: E_Dream-Y0002&#10;Region Once Human: Southeast Asia Server&#10;Ngày mua: 10:07:59 26/12/2025)" required></textarea>
-            <small class="form-text text-muted">Hệ thống sẽ tự động nhận diện Order ID, UID và Product ID từ thông tin bạn dán.</small>
+                placeholder="Dán thông tin đơn hàng vào đây (ví dụ:&#10;Mã đơn hàng: 836396&#10;Tên sản phẩm: Elite Battle Pass Where Winds Meet ID x 1&#10;Character ID Where Winds Meet: 4039549251&#10;Ngày mua: 15:26:40 03/01/2026&#10;&#10;Hoặc One Human:&#10;Mã đơn hàng: 816315&#10;Tên sản phẩm: 2340 Crystgin Once Human Chỉ Cần ID x 1&#10;UID Once Human: 1541918960&#10;Sever Once Human: E_Dream-Y0002&#10;Region Once Human: Southeast Asia Server&#10;Ngày mua: 10:07:59 26/12/2025)" required></textarea>
+            <small class="form-text text-muted">Hệ thống sẽ tự động nhận diện Order ID, UID và Product ID từ thông tin bạn dán. <strong>Lưu ý: UID phải có đúng 10 chữ số (ví dụ: 4059837621)</strong></small>
         </div>
 
         <!-- Hidden fields để lưu giá trị đã parse -->
@@ -98,8 +98,9 @@
                 result.order_id = orderIdMatch[1].trim();
             }
 
-            // Parse UID: "UID: User ID: 4033075547" hoặc "UID: 4033075547" hoặc "UID Once Human: 154191896"
-            const uidMatch = text.match(/UID:.*?User ID:\s*(\d+)/i) ||
+            // Parse UID: "Character ID Where Winds Meet: 4039549251" hoặc "UID: User ID: 4033075547" hoặc "UID: 4033075547" hoặc "UID Once Human: 154191896"
+            const uidMatch = text.match(/Character ID Where Winds Meet:\s*(\d+)/i) ||
+                text.match(/UID:.*?User ID:\s*(\d+)/i) ||
                 text.match(/UID Once Human:\s*(\d+)/i) ||
                 text.match(/UID:\s*(\d+)/i);
             if (uidMatch) {
@@ -160,9 +161,33 @@
             return result;
         }
 
+        // Hàm validate UID phải có đúng 10 chữ số
+        function isValidUid(uid) {
+            if (!uid) return false;
+            // Kiểm tra UID phải là số và có đúng 10 chữ số
+            return /^\d{10}$/.test(uid);
+        }
+
         function updatePreview(parsed) {
             document.getElementById('preview_order_id').textContent = parsed.order_id || '-';
-            document.getElementById('preview_uid').textContent = parsed.uid || '-';
+
+            // Hiển thị UID với cảnh báo nếu không hợp lệ
+            const uidElement = document.getElementById('preview_uid');
+            if (parsed.uid) {
+                if (isValidUid(parsed.uid)) {
+                    uidElement.textContent = parsed.uid;
+                    uidElement.style.color = '';
+                    uidElement.style.fontWeight = '';
+                } else {
+                    uidElement.textContent = parsed.uid + ' (⚠️ UID phải có đúng 10 chữ số)';
+                    uidElement.style.color = '#dc3545';
+                    uidElement.style.fontWeight = 'bold';
+                }
+            } else {
+                uidElement.textContent = '-';
+                uidElement.style.color = '';
+                uidElement.style.fontWeight = '';
+            }
 
             // Hiển thị tên sản phẩm thay vì product_id
             let productName = '-';
@@ -193,10 +218,12 @@
             }
 
             // Hiển thị/ẩn preview và enable/disable submit button
+            // Kiểm tra UID phải hợp lệ (10 chữ số)
+            const isValid = parsed.order_id && parsed.uid && parsed.product_id && isValidUid(parsed.uid);
             if (parsed.order_id && parsed.uid && parsed.product_id) {
                 parsedInfoDiv.style.display = 'block';
-                submitBtn.disabled = false;
-                continueAddBtn.disabled = false;
+                submitBtn.disabled = !isValid;
+                continueAddBtn.disabled = !isValid;
             } else {
                 parsedInfoDiv.style.display = 'none';
                 submitBtn.disabled = true;
@@ -249,6 +276,12 @@
                 return false;
             }
 
+            // Validate UID phải có đúng 10 chữ số
+            if (!isValidUid(uid)) {
+                alert('UID phải có đúng 10 chữ số! Ví dụ: 4059837621');
+                return false;
+            }
+
             // Set flag để tiếp tục thêm
             continueAddInput.value = '1';
             // Submit form
@@ -264,6 +297,13 @@
             if (!orderId || !uid || !productId) {
                 e.preventDefault();
                 alert('Vui lòng dán đầy đủ thông tin đơn hàng để hệ thống có thể nhận diện Order ID, UID và Product ID!');
+                return false;
+            }
+
+            // Validate UID phải có đúng 10 chữ số
+            if (!isValidUid(uid)) {
+                e.preventDefault();
+                alert('UID phải có đúng 10 chữ số! Ví dụ: 4059837621');
                 return false;
             }
 

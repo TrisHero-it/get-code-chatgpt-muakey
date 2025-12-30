@@ -52,4 +52,27 @@ class db
         );
         return $connect;
     }
+
+    function getData3($query, $getAll = true)
+    {
+        $conn = $this->getConnect3();
+        $stmt = $conn->prepare($query);
+        $stmt->execute();
+        if ($getAll) {
+            return $stmt->fetchAll();
+        }
+        return $stmt->fetch();
+    }
+
+    function getConnect3()
+    {
+        $connect = new PDO(
+            "mysql:host=" . DBHOST3
+                . ";dbname=" . DBNAME3
+                . ";charset=" . DBCHARSET3,
+            DBUSER3,
+            DBPASS3
+        );
+        return $connect;
+    }
 }

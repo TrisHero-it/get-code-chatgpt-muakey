@@ -60,7 +60,8 @@
         </div>
     </div>
 
-    <div class="row mt-4">
+
+    <div class="row mt-4" style="display: flex;">
         <!-- Back to List Card -->
         <div class="col-md-5 mb-4">
             <div class="card shadow-sm h-100">
@@ -78,6 +79,34 @@
                     <div class="d-grid gap-2">
                         <a href="?act=list" class="btn btn-info">
                             <i class="fas fa-list"></i> Quay về trang list
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-store fa-3x text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="card-title mb-0">MidasBuy</h4>
+                            <p class="text-muted mb-0">Quản lý đơn hàng và tài khoản MidasBuy</p>
+                        </div>
+                    </div>
+                    <p class="card-text">Quản lý các đơn hàng và tài khoản MidasBuy với thông tin UID và Token.</p>
+                    <div class="d-grid gap-2">
+                        <a href="?act=midas-orders" class="btn btn-warning">
+                            <i class="fas fa-list"></i> Xem danh sách Orders
+                        </a>
+                        <a href="?act=midas-order-add" class="btn btn-outline-warning">
+                            <i class="fas fa-plus"></i> Thêm đơn hàng mới
+                        </a>
+                        <a href="?act=midas-accounts" class="btn btn-outline-warning">
+                            <i class="fas fa-users"></i> Quản lý tài khoản
                         </a>
                     </div>
                 </div>

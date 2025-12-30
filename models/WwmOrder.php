@@ -41,6 +41,86 @@ class WwmOrder extends db
     }
 
     /**
+     * Lấy danh sách wwm_orders với phân trang và tìm kiếm
+     */
+    public function getOrdersPaginated($page = 1, $perPage = 30, $category = null, $searchOrderId = null)
+    {
+        $offset = ($page - 1) * $perPage;
+        $pdo = $this->getConnect();
+
+        $whereConditions = [];
+        $params = [];
+
+        if ($category !== null && $category !== '') {
+            $whereConditions[] = "category = ?";
+            $params[] = $category;
+        }
+
+        if ($searchOrderId !== null && $searchOrderId !== '') {
+            $whereConditions[] = "order_id LIKE ?";
+            $params[] = '%' . $searchOrderId . '%';
+        }
+
+        $whereClause = '';
+        if (!empty($whereConditions)) {
+            $whereClause = "WHERE " . implode(" AND ", $whereConditions);
+        }
+
+        // Sử dụng prepared statement cho LIMIT và OFFSET
+        $perPage = (int)$perPage;
+        $offset = (int)$offset;
+        $query = "SELECT * FROM wwm_orders $whereClause ORDER BY id DESC LIMIT $perPage OFFSET $offset";
+
+        if (!empty($params)) {
+            $stmt = $pdo->prepare($query);
+            $stmt->execute($params);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Đếm tổng số wwm_orders với điều kiện
+     */
+    public function getTotalCount($category = null, $searchOrderId = null)
+    {
+        $pdo = $this->getConnect();
+
+        $whereConditions = [];
+        $params = [];
+
+        if ($category !== null && $category !== '') {
+            $whereConditions[] = "category = ?";
+            $params[] = $category;
+        }
+
+        if ($searchOrderId !== null && $searchOrderId !== '') {
+            $whereConditions[] = "order_id LIKE ?";
+            $params[] = '%' . $searchOrderId . '%';
+        }
+
+        $whereClause = '';
+        if (!empty($whereConditions)) {
+            $whereClause = "WHERE " . implode(" AND ", $whereConditions);
+        }
+
+        $query = "SELECT COUNT(*) as total FROM wwm_orders $whereClause";
+
+        if (!empty($params)) {
+            $stmt = $pdo->prepare($query);
+            $stmt->execute($params);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $result ? (int)$result['total'] : 0;
+        }
+
+        $result = $this->getData($query, false);
+        return $result ? (int)$result['total'] : 0;
+    }
+
+    /**
      * Lấy danh sách các category có trong database
      */
     public function getCategories()
