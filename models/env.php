@@ -17,3 +17,9 @@ const DBUSER3 = "root";
 const DBPASS3 = "";
 const DBCHARSET3 = "utf8mb4";
 const DBHOST3 = "localhost";
+
+const DBNAME4 = "midasbuy_japan";
+const DBUSER4 = "root";
+const DBPASS4 = "";
+const DBCHARSET4 = "utf8mb4";
+const DBHOST4 = "localhost";

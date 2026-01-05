@@ -75,4 +75,27 @@ class db
         );
         return $connect;
     }
+
+    function getData4($query, $getAll = true)
+    {
+        $conn = $this->getConnect4();
+        $stmt = $conn->prepare($query);
+        $stmt->execute();
+        if ($getAll) {
+            return $stmt->fetchAll();
+        }
+        return $stmt->fetch();
+    }
+
+    function getConnect4()
+    {
+        $connect = new PDO(
+            "mysql:host=" . DBHOST4
+                . ";dbname=" . DBNAME4
+                . ";charset=" . DBCHARSET4,
+            DBUSER4,
+            DBPASS4
+        );
+        return $connect;
+    }
 }

@@ -88,11 +88,14 @@ class WwmOrderController extends WwmOrder
             'product_id' => '',
             'category' => '',
             'server' => '',
-            'region' => ''
+            'region' => '',
+            'purchase_date' => ''
         ];
 
-        // Parse Order ID: "Mã đơn hàng: 797741"
-        if (preg_match('/Mã đơn hàng:\s*(\d+)/i', $text, $matches)) {
+        // Parse Order ID: "Mã đơn hàng: 836396" hoặc "Mã ĐH: 797741"
+        if (preg_match('/Mã\s+đơn\s+hàng:\s*(\d+)/i', $text, $matches)) {
+            $result['order_id'] = trim($matches[1]);
+        } elseif (preg_match('/Mã\s+ĐH:\s*(\d+)/i', $text, $matches)) {
             $result['order_id'] = trim($matches[1]);
         }
 
@@ -117,16 +120,30 @@ class WwmOrderController extends WwmOrder
             $result['region'] = trim($matches[1]);
         }
 
-        // Parse Product Name và tìm product_id
-        if (preg_match('/Tên sản phẩm:\s*(.+?)(?:\n|$)/i', $text, $matches)) {
-            $productName = trim($matches[1]);
+        // Parse Purchase Date: "Ngày mua: 15:26:40 03/01/2026"
+        if (preg_match('/Ngày mua:\s*(.+?)(?:\n|$)/i', $text, $matches)) {
+            $result['purchase_date'] = trim($matches[1]);
+        }
 
-            // Hàm normalize tên sản phẩm: loại bỏ các phần thừa
+        // Parse Product Name và tìm product_id: "Tên sản phẩm: ..." hoặc "Sản phẩm: ..."
+        $productName = null;
+        if (preg_match('/Tên\s+sản\s+phẩm:\s*(.+?)(?:\n|$)/i', $text, $matches)) {
+            $productName = trim($matches[1]);
+        } elseif (preg_match('/Sản\s+phẩm:\s*(.+?)(?:\n|$)/i', $text, $matches)) {
+            $productName = trim($matches[1]);
+        }
+
+        if ($productName) {
+
+            // Hàm normalize sản phẩm: loại bỏ các phần thừa
             $normalizeProductName = function ($name) {
                 // Loại bỏ " x 1", " x 2" ở cuối
                 $name = preg_replace('/\s+x\s+\d+$/i', '', $name);
-                // Loại bỏ " ID", " Bản Mobile" ở cuối
-                $name = preg_replace('/\s+(ID|Bản Mobile)$/i', '', $name);
+                // Loại bỏ " ID", " Bản Mobile" ở cuối (có thể có cả hai)
+                $name = preg_replace('/\s+(ID|Bản Mobile)\s*$/i', '', $name);
+                $name = preg_replace('/\s+(ID|Bản Mobile)\s*$/i', '', $name); // Loại bỏ lần nữa nếu còn
+                // Loại bỏ "Chỉ Cần ID" ở cuối (cho One Human)
+                $name = preg_replace('/\s+Chỉ Cần ID\s*$/i', '', $name);
                 return trim($name);
             };
 
@@ -159,11 +176,14 @@ class WwmOrderController extends WwmOrder
                 // Normalize tên sản phẩm trong danh sách
                 $normalizedProductName = $normalizeProductName($product['goodsinfo']);
 
-                // So sánh tên đã normalize
+                // So sánh tên đã normalize (case-insensitive)
+                $normalizedLower = mb_strtolower($normalizedProductName, 'UTF-8');
+                $cleanLower = mb_strtolower($cleanProductName, 'UTF-8');
+
                 if (
-                    $normalizedProductName === $cleanProductName ||
-                    strpos($normalizedProductName, $cleanProductName) !== false ||
-                    strpos($cleanProductName, $normalizedProductName) !== false
+                    $normalizedLower === $cleanLower ||
+                    mb_strpos($normalizedLower, $cleanLower, 0, 'UTF-8') !== false ||
+                    mb_strpos($cleanLower, $normalizedLower, 0, 'UTF-8') !== false
                 ) {
                     $result['product_id'] = $product['goodsid'];
                     // Kiểm tra category dựa trên product_id

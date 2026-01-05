@@ -30,6 +30,7 @@
         <input type="hidden" id="category" name="category" value="">
         <input type="hidden" id="server" name="server" value="">
         <input type="hidden" id="region" name="region" value="">
+        <input type="hidden" id="purchase_date" name="purchase_date" value="">
         <input type="hidden" id="continue_add" name="continue_add" value="0">
 
         <!-- Preview thông tin đã parse -->
@@ -37,7 +38,7 @@
             <h6>Thông tin đã nhận diện:</h6>
             <ul class="mb-0">
                 <li><strong>Order ID:</strong> <span id="preview_order_id">-</span></li>
-                <li><strong>UID:</strong> <span id="preview_uid">-</span></li>
+                <li><strong>UID:</strong> <span id="preview_uid">-</span> <span id="preview_uid_check" class="ms-2" style="display: none;"></span></li>
                 <li><strong>Product ID:</strong> <span id="preview_product_id">-</span></li>
                 <li><strong>Category:</strong> <span id="preview_category">-</span></li>
                 <li id="preview_server_li" style="display: none;"><strong>Server:</strong> <span id="preview_server">-</span></li>
@@ -64,10 +65,12 @@
         const categoryInput = document.getElementById('category');
         const serverInput = document.getElementById('server');
         const regionInput = document.getElementById('region');
+        const purchaseDateInput = document.getElementById('purchase_date');
         const continueAddInput = document.getElementById('continue_add');
         const parsedInfoDiv = document.getElementById('parsedInfo');
         const submitBtn = document.getElementById('submitBtn');
         const continueAddBtn = document.getElementById('continueAddBtn');
+        let uidApiValid = null;
 
         // Danh sách products từ PHP
         const iosProducts = <?php echo json_encode($iosProducts); ?>;
@@ -89,11 +92,15 @@
                 product_id: '',
                 category: '',
                 server: '',
-                region: ''
+                region: '',
+                purchase_date: ''
             };
 
-            // Parse Order ID: "Mã đơn hàng: 797741"
-            const orderIdMatch = text.match(/Mã đơn hàng:\s*(\d+)/i);
+            // Parse Order ID: "Mã đơn hàng: 836396" hoặc "Mã ĐH: 797741"
+            let orderIdMatch = text.match(/Mã\s+đơn\s+hàng:\s*(\d+)/i);
+            if (!orderIdMatch) {
+                orderIdMatch = text.match(/Mã\s+ĐH:\s*(\d+)/i);
+            }
             if (orderIdMatch) {
                 result.order_id = orderIdMatch[1].trim();
             }
@@ -119,8 +126,17 @@
                 result.region = regionMatch[1].trim();
             }
 
-            // Parse Product Name: "Tên sản phẩm: 6000 Echo Beads Where Winds Meet x 1"
-            const productNameMatch = text.match(/Tên sản phẩm:\s*(.+?)(?:\n|$)/i);
+            // Parse Purchase Date: "Ngày mua: 15:26:40 03/01/2026"
+            const purchaseDateMatch = text.match(/Ngày mua:\s*(.+?)(?:\n|$)/i);
+            if (purchaseDateMatch) {
+                result.purchase_date = purchaseDateMatch[1].trim();
+            }
+
+            // Parse Product Name: "Tên sản phẩm: 6000 Echo Beads Where Winds Meet x 1" hoặc "Sản phẩm: ..."
+            let productNameMatch = text.match(/Tên\s+sản\s+phẩm:\s*(.+?)(?:\n|$)/i);
+            if (!productNameMatch) {
+                productNameMatch = text.match(/Sản\s+phẩm:\s*(.+?)(?:\n|$)/i);
+            }
             if (productNameMatch) {
                 const productName = productNameMatch[1].trim();
 
@@ -128,8 +144,11 @@
                 function normalizeProductName(name) {
                     // Loại bỏ " x 1", " x 2" ở cuối
                     name = name.replace(/\s+x\s+\d+$/i, '').trim();
-                    // Loại bỏ " ID", " Bản Mobile" ở cuối
-                    name = name.replace(/\s+(ID|Bản Mobile)$/i, '').trim();
+                    // Loại bỏ " ID", " Bản Mobile" ở cuối (có thể có cả hai)
+                    name = name.replace(/\s+(ID|Bản Mobile)\s*$/i, '').trim();
+                    name = name.replace(/\s+(ID|Bản Mobile)\s*$/i, '').trim(); // Loại bỏ lần nữa nếu còn
+                    // Loại bỏ "Chỉ Cần ID" ở cuối (cho One Human)
+                    name = name.replace(/\s+Chỉ Cần ID\s*$/i, '').trim();
                     return name;
                 }
 
@@ -142,10 +161,13 @@
                     // Normalize tên sản phẩm trong danh sách
                     const normalizedProductName = normalizeProductName(product.goodsinfo);
 
-                    // So sánh tên đã normalize
-                    if (normalizedProductName === cleanProductName ||
-                        normalizedProductName.includes(cleanProductName) ||
-                        cleanProductName.includes(normalizedProductName)) {
+                    // So sánh tên đã normalize (case-insensitive)
+                    const normalizedLower = normalizedProductName.toLowerCase();
+                    const cleanLower = cleanProductName.toLowerCase();
+
+                    if (normalizedLower === cleanLower ||
+                        normalizedLower.includes(cleanLower) ||
+                        cleanLower.includes(normalizedLower)) {
                         result.product_id = product.goodsid;
                         // Kiểm tra category dựa trên product_id
                         if (wwmProductIds.includes(product.goodsid)) {
@@ -161,32 +183,52 @@
             return result;
         }
 
-        // Hàm validate UID phải có đúng 10 chữ số
         function isValidUid(uid) {
             if (!uid) return false;
-            // Kiểm tra UID phải là số và có đúng 10 chữ số
             return /^\d{10}$/.test(uid);
         }
 
-        function updatePreview(parsed) {
+        async function checkUidWwmApi(uid) {
+            try {
+                const res = await fetch('api.php?act=check-uid-wwm&uid=' + encodeURIComponent(uid));
+                const data = await res.json();
+                return data && data.code === '0206' ? { valid: false } : { valid: true };
+            } catch (e) {
+                return { valid: false };
+            }
+        }
+
+        function updatePreview(parsed, uidCheckResult) {
             document.getElementById('preview_order_id').textContent = parsed.order_id || '-';
 
-            // Hiển thị UID với cảnh báo nếu không hợp lệ
             const uidElement = document.getElementById('preview_uid');
+            const uidCheckSpan = document.getElementById('preview_uid_check');
             if (parsed.uid) {
                 if (isValidUid(parsed.uid)) {
                     uidElement.textContent = parsed.uid;
                     uidElement.style.color = '';
                     uidElement.style.fontWeight = '';
+                    if (uidCheckResult && parsed.category && parsed.category.toLowerCase() === 'where winds meet') {
+                        uidCheckSpan.style.display = 'inline';
+                        uidCheckSpan.innerHTML = uidCheckResult.valid === false
+                            ? '<span class="badge bg-danger">UID không tồn tại</span>'
+                            : uidCheckResult.valid === true
+                                ? '<span class="badge bg-success">UID hợp lệ</span>'
+                                : '<span class="badge bg-secondary">Đang kiểm tra...</span>';
+                    } else {
+                        uidCheckSpan.style.display = 'none';
+                    }
                 } else {
                     uidElement.textContent = parsed.uid + ' (⚠️ UID phải có đúng 10 chữ số)';
                     uidElement.style.color = '#dc3545';
                     uidElement.style.fontWeight = 'bold';
+                    uidCheckSpan.style.display = 'none';
                 }
             } else {
                 uidElement.textContent = '-';
                 uidElement.style.color = '';
                 uidElement.style.fontWeight = '';
+                uidCheckSpan.style.display = 'none';
             }
 
             // Hiển thị tên sản phẩm thay vì product_id
@@ -217,13 +259,14 @@
                 document.getElementById('preview_region_li').style.display = 'none';
             }
 
-            // Hiển thị/ẩn preview và enable/disable submit button
-            // Kiểm tra UID phải hợp lệ (10 chữ số)
-            const isValid = parsed.order_id && parsed.uid && parsed.product_id && isValidUid(parsed.uid);
+            const basicValid = parsed.order_id && parsed.uid && parsed.product_id && isValidUid(parsed.uid);
+            const isWwm = parsed.category && parsed.category.toLowerCase() === 'where winds meet';
+            const uidApiOk = !isWwm || (uidCheckResult && uidCheckResult.valid === true);
+            const canSubmit = basicValid && uidApiOk;
             if (parsed.order_id && parsed.uid && parsed.product_id) {
                 parsedInfoDiv.style.display = 'block';
-                submitBtn.disabled = !isValid;
-                continueAddBtn.disabled = !isValid;
+                submitBtn.disabled = !canSubmit;
+                continueAddBtn.disabled = !canSubmit;
             } else {
                 parsedInfoDiv.style.display = 'none';
                 submitBtn.disabled = true;
@@ -231,22 +274,30 @@
             }
         }
 
-        function handleInput() {
+        async function handleInput() {
             const text = orderDataTextarea.value;
             if (text.trim()) {
                 const parsed = parseOrderData(text);
-
-                // Cập nhật hidden fields
                 orderIdInput.value = parsed.order_id;
                 uidInput.value = parsed.uid;
                 productIdInput.value = parsed.product_id;
                 categoryInput.value = parsed.category;
                 serverInput.value = parsed.server;
                 regionInput.value = parsed.region;
+                purchaseDateInput.value = parsed.purchase_date || '';
 
-                // Cập nhật preview
-                updatePreview(parsed);
+                let uidCheckResult = null;
+                const isWwm = parsed.category && parsed.category.toLowerCase() === 'where winds meet';
+                if (isWwm && parsed.uid && isValidUid(parsed.uid)) {
+                    updatePreview(parsed, { valid: null });
+                    uidCheckResult = await checkUidWwmApi(parsed.uid);
+                    uidApiValid = uidCheckResult.valid;
+                } else {
+                    uidApiValid = null;
+                }
+                updatePreview(parsed, uidCheckResult);
             } else {
+                uidApiValid = null;
                 parsedInfoDiv.style.display = 'none';
                 submitBtn.disabled = true;
                 orderIdInput.value = '';
@@ -255,6 +306,7 @@
                 categoryInput.value = '';
                 serverInput.value = '';
                 regionInput.value = '';
+                purchaseDateInput.value = '';
             }
         }
 
@@ -276,13 +328,15 @@
                 return false;
             }
 
-            // Validate UID phải có đúng 10 chữ số
             if (!isValidUid(uid)) {
                 alert('UID phải có đúng 10 chữ số! Ví dụ: 4059837621');
                 return false;
             }
+            if (categoryInput.value.toLowerCase() === 'where winds meet' && uidApiValid === false) {
+                alert('UID không hợp lệ hoặc đã không còn tồn tại trong game Where Winds Meet!');
+                return false;
+            }
 
-            // Set flag để tiếp tục thêm
             continueAddInput.value = '1';
             // Submit form
             document.getElementById('wwmOrderForm').submit();
@@ -300,14 +354,17 @@
                 return false;
             }
 
-            // Validate UID phải có đúng 10 chữ số
             if (!isValidUid(uid)) {
                 e.preventDefault();
                 alert('UID phải có đúng 10 chữ số! Ví dụ: 4059837621');
                 return false;
             }
+            if (categoryInput.value.toLowerCase() === 'where winds meet' && uidApiValid === false) {
+                e.preventDefault();
+                alert('UID không hợp lệ hoặc đã không còn tồn tại trong game Where Winds Meet!');
+                return false;
+            }
 
-            // Nếu không phải nút "Thêm tiếp", reset flag
             if (continueAddInput.value !== '1') {
                 continueAddInput.value = '0';
             }
@@ -316,6 +373,7 @@
         // Clear form khi có success message (để sẵn sàng thêm tiếp)
         <?php if (isset($_GET['success'])): ?>
             setTimeout(function() {
+                uidApiValid = null;
                 orderDataTextarea.value = '';
                 orderIdInput.value = '';
                 uidInput.value = '';
@@ -323,6 +381,7 @@
                 categoryInput.value = '';
                 serverInput.value = '';
                 regionInput.value = '';
+                purchaseDateInput.value = '';
                 continueAddInput.value = '0';
                 parsedInfoDiv.style.display = 'none';
                 submitBtn.disabled = true;

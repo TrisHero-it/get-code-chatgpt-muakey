@@ -22,6 +22,7 @@
     require_once 'controllers/WwmOrderController.php';
     require_once 'controllers/MidasBuyAccountController.php';
     require_once 'controllers/MidasBuyOrderController.php';
+    require_once 'controllers/MidasBuyJapanOrderController.php';
     require_once 'vendor/autoload.php';
     $codeController = new CodeController();
     $steamController = new SteamController();
@@ -645,6 +646,102 @@
                 }
                 $midasOrderController = new MidasBuyOrderController();
                 $midasOrderController->deleteAllExceptPending();
+                break;
+            case 'midas-japan-orders':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasJapanOrderController = new MidasBuyJapanOrderController();
+                $midasJapanOrderController->index();
+                break;
+            case 'midas-japan-order-add':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasJapanOrderController = new MidasBuyJapanOrderController();
+                $midasJapanOrderController->add();
+                break;
+            case 'midas-japan-order-store':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasJapanOrderController = new MidasBuyJapanOrderController();
+                $midasJapanOrderController->store();
+                break;
+            case 'midas-japan-order-edit':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasJapanOrderController = new MidasBuyJapanOrderController();
+                $midasJapanOrderController->edit($_GET['id']);
+                break;
+            case 'midas-japan-order-update':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasJapanOrderController = new MidasBuyJapanOrderController();
+                $midasJapanOrderController->updateOrder();
+                break;
+            case 'midas-japan-order-delete':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasJapanOrderController = new MidasBuyJapanOrderController();
+                $midasJapanOrderController->delete($_GET['id']);
                 break;
             default:
                 $codeController->index();

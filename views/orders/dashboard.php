@@ -16,16 +16,16 @@
                             <i class="fas fa-shopping-cart fa-3x text-primary"></i>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h4 class="card-title mb-0">Chuyển vùng Steam</h4>
+                            <h4 class="card-title mb-0">Midasbuy-Japan</h4>
                             <p class="text-muted mb-0">Quản lý đơn hàng thông thường</p>
                         </div>
                     </div>
                     <p class="card-text">Quản lý các đơn hàng với thông tin username, password và backup code.</p>
                     <div class="d-grid gap-2">
-                        <a href="?act=orders" class="btn btn-primary">
+                        <a href="?act=midas-japan-orders" class="btn btn-primary">
                             <i class="fas fa-list"></i> Xem danh sách Orders
                         </a>
-                        <a href="?act=order-add" class="btn btn-outline-primary">
+                        <a href="?act=midas-japan-order-add" class="btn btn-outline-primary">
                             <i class="fas fa-plus"></i> Thêm đơn hàng mới
                         </a>
                     </div>

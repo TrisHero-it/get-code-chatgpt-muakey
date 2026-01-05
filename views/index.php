@@ -90,8 +90,9 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                         if ($createdAtPlus15 <= $now) {
                                             continue;
                                         } else {
-                                            if (($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email)) {
-
+                                            if (($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) ||
+                                                (mb_strtolower($item['to'][0]['address'], 'UTF-8') == $email && $item['from']['name'] == 'Netflix')
+                                            ) {
                                     ?>
                                                 <tr>
                                                     <td>
@@ -99,6 +100,8 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                             <?php
                                                             if ($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) {
                                                                 echo "<span id='code" . $item['@id'] . "'></span>";
+
+                                                                $text = $item['intro'];
                                                             ?>
                                                                 <script>
                                                                     $.ajax({
