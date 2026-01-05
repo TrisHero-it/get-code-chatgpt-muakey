@@ -20,8 +20,8 @@
             <tr>
                 <th scope="col">Email</th>
                 <th scope="col">Password</th>
-                <th scope="col">Type</th>
-                <th scope="col">Action</th>
+                <th scope="col">Loại</th>
+                <th scope="col">Hành động</th>
             </tr>
         </thead>
         <tbody>
