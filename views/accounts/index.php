@@ -20,8 +20,8 @@
             <tr>
                 <th scope="col">Email</th>
                 <th scope="col">Password</th>
-                <th scope="col">Type</th>
-                <th scope="col">Action</th>
+                <th scope="col">Loại</th>
+                <th scope="col">Hành động</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
             ?>
                 <tr>
                     <td><?php echo $account['email'] ?></td>
-                    <td><?php echo $account['password'] ?></td>
+                    <td><?php echo htmlspecialchars($account['password'], ENT_QUOTES, 'UTF-8'); ?></td>
                     <td><span class="badge bg-<?php echo $account['type'] == 'Netflix' ? 'danger' : 'primary' ?>"><?php echo $account['type'] ?></span></td>
                     <td>
                         <a onclick="return confirm('Bạn có chắc chắn muốn xóa tài khoản này không?')" href="?act=delete&id=<?php echo $account['id'] ?>" class="btn btn-danger">Delete</a>

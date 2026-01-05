@@ -90,8 +90,9 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                         if ($createdAtPlus15 <= $now) {
                                             continue;
                                         } else {
-                                            if (($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email)) {
-
+                                            if (($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) ||
+                                                (mb_strtolower($item['to'][0]['address'], 'UTF-8') == $email && $item['from']['name'] == 'Netflix')
+                                            ) {
                                     ?>
                                                 <tr>
                                                     <td>
@@ -99,30 +100,37 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                             <?php
                                                             if ($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) {
                                                                 echo "<span id='code" . $item['@id'] . "'></span>";
-                                                            ?>
-                                                                <script>
-                                                                    $.ajax({
-                                                                        url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
-                                                                        method: "GET",
-                                                                        headers: {
-                                                                            "Authorization": "Bearer <?php echo $token ?>"
-                                                                        },
-                                                                        success: function(response) {
-                                                                            const html = response.html[0];
-                                                                            const parser = new DOMParser();
-                                                                            const doc = parser.parseFromString(html, 'text/html');
-                                                                            const aTag = doc.querySelector('a.h5[href*="netflix.com/account/travel/verify"]');
 
-                                                                            if (aTag) {
-                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `<a class="btn btn-primary" href="${aTag.href}"> click here </a>`;
-                                                                            } else {
-                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `ERROR NOT FOUND`;
+                                                                $text = $item['intro'];
+
+                                                                if (preg_match('/\b\d{4,6}\b/', $text, $matches)) {
+                                                                    echo $matches[0]; // có số → in mã
+                                                                } else {
+                                                            ?>
+                                                                    <script>
+                                                                        $.ajax({
+                                                                            url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
+                                                                            method: "GET",
+                                                                            headers: {
+                                                                                "Authorization": "Bearer <?php echo $token ?>"
+                                                                            },
+                                                                            success: function(response) {
+                                                                                const html = response.html[0];
+                                                                                const parser = new DOMParser();
+                                                                                const doc = parser.parseFromString(html, 'text/html');
+                                                                                const aTag = doc.querySelector('a.h5[href*="netflix.com/account/travel/verify"]');
+
+                                                                                if (aTag) {
+                                                                                    document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `<a class="btn btn-primary" href="${aTag.href}"> click here </a>`;
+                                                                                } else {
+                                                                                    document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `ERROR NOT FOUND`;
+                                                                                }
                                                                             }
-                                                                        }
-                                                                    });
-                                                                </script>
+                                                                        });
+                                                                    </script>
 
                                                             <?php
+                                                                }
                                                             }
                                                             ?>
                                                         </span>

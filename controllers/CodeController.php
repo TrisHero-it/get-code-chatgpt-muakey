@@ -18,15 +18,11 @@ class CodeController extends Account
                 ];
                 $token = $this->getToken($data);
                 $token = isset($token) ? json_decode($token)->token : 1;
+                $default = 0;
             } else {
-                $token = 1;
-                $accountChatgpt = $account2->getAccountByEmailAndType2(strtolower($_GET['email']), 3);
-                if ($accountChatgpt == null) {
-                    echo "Không tìm thấy tài khoản";
-                    exit;
-                }
-                require_once "views/index.php";
-                exit;
+                $default = 1;
+                // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Njc2MDA3NTksInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoic3RhdGlzdGljYWxreWxpZUBwdW5rcHJvb2YuY29tIiwiaWQiOiI2ODYyYWUwMWJlMzgxOTg4N2YwY2ZmZjAiLCJtZXJjdXJlIjp7InN1YnNjcmliZSI6WyIvYWNjb3VudHMvNjg2MmFlMDFiZTM4MTk4ODdmMGNmZmYwIl19fQ.uz2P3Grlx3L8BpWLDT0NSkTkLBQiCJSjmDsK207EfBG26iG19cYT42nm3g210XWjha7sIqW0pcoVK048bLWgeA";
+                $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Njc2MDcxNzEsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoidHVuZ2FuaGJpZ2F5QGNvbWZ5dGhpbmdzLmNvbSIsImlkIjoiNjkzYmU4MjMwMGY4MDRmODEwMDk3MmJjIiwibWVyY3VyZSI6eyJzdWJzY3JpYmUiOlsiL2FjY291bnRzLzY5M2JlODIzMDBmODA0ZjgxMDA5NzJiYyJdfX0.IQTfV9C7AVmmog-NxX1Ye0S5v8UTqG8_BtaO3kkeybzeq7BDMJLEMujHC8NS2hRgyamlOlFQy-jX8QveOfe56A";
             }
         } else {
             require_once "views/index.php";
@@ -73,7 +69,7 @@ class CodeController extends Account
 
     public function getToken(array $accounts)
     {
-        $url = 'https://api.mail.tm/token'; 
+        $url = 'https://api.mail.tm/token';
 
         // Dữ liệu cần gửi
         $data = [
