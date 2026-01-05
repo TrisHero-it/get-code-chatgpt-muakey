@@ -30,6 +30,7 @@
         <input type="hidden" id="category" name="category" value="">
         <input type="hidden" id="server" name="server" value="">
         <input type="hidden" id="region" name="region" value="">
+        <input type="hidden" id="purchase_date" name="purchase_date" value="">
         <input type="hidden" id="continue_add" name="continue_add" value="0">
 
         <!-- Preview thông tin đã parse -->
@@ -64,6 +65,7 @@
         const categoryInput = document.getElementById('category');
         const serverInput = document.getElementById('server');
         const regionInput = document.getElementById('region');
+        const purchaseDateInput = document.getElementById('purchase_date');
         const continueAddInput = document.getElementById('continue_add');
         const parsedInfoDiv = document.getElementById('parsedInfo');
         const submitBtn = document.getElementById('submitBtn');
@@ -89,11 +91,15 @@
                 product_id: '',
                 category: '',
                 server: '',
-                region: ''
+                region: '',
+                purchase_date: ''
             };
 
-            // Parse Order ID: "Mã đơn hàng: 797741"
-            const orderIdMatch = text.match(/Mã đơn hàng:\s*(\d+)/i);
+            // Parse Order ID: "Mã đơn hàng: 836396" hoặc "Mã ĐH: 797741"
+            let orderIdMatch = text.match(/Mã\s+đơn\s+hàng:\s*(\d+)/i);
+            if (!orderIdMatch) {
+                orderIdMatch = text.match(/Mã\s+ĐH:\s*(\d+)/i);
+            }
             if (orderIdMatch) {
                 result.order_id = orderIdMatch[1].trim();
             }
@@ -119,8 +125,17 @@
                 result.region = regionMatch[1].trim();
             }
 
-            // Parse Product Name: "Tên sản phẩm: 6000 Echo Beads Where Winds Meet x 1"
-            const productNameMatch = text.match(/Tên sản phẩm:\s*(.+?)(?:\n|$)/i);
+            // Parse Purchase Date: "Ngày mua: 15:26:40 03/01/2026"
+            const purchaseDateMatch = text.match(/Ngày mua:\s*(.+?)(?:\n|$)/i);
+            if (purchaseDateMatch) {
+                result.purchase_date = purchaseDateMatch[1].trim();
+            }
+
+            // Parse Product Name: "Tên sản phẩm: 6000 Echo Beads Where Winds Meet x 1" hoặc "Sản phẩm: ..."
+            let productNameMatch = text.match(/Tên\s+sản\s+phẩm:\s*(.+?)(?:\n|$)/i);
+            if (!productNameMatch) {
+                productNameMatch = text.match(/Sản\s+phẩm:\s*(.+?)(?:\n|$)/i);
+            }
             if (productNameMatch) {
                 const productName = productNameMatch[1].trim();
 
@@ -128,8 +143,11 @@
                 function normalizeProductName(name) {
                     // Loại bỏ " x 1", " x 2" ở cuối
                     name = name.replace(/\s+x\s+\d+$/i, '').trim();
-                    // Loại bỏ " ID", " Bản Mobile" ở cuối
-                    name = name.replace(/\s+(ID|Bản Mobile)$/i, '').trim();
+                    // Loại bỏ " ID", " Bản Mobile" ở cuối (có thể có cả hai)
+                    name = name.replace(/\s+(ID|Bản Mobile)\s*$/i, '').trim();
+                    name = name.replace(/\s+(ID|Bản Mobile)\s*$/i, '').trim(); // Loại bỏ lần nữa nếu còn
+                    // Loại bỏ "Chỉ Cần ID" ở cuối (cho One Human)
+                    name = name.replace(/\s+Chỉ Cần ID\s*$/i, '').trim();
                     return name;
                 }
 
@@ -142,10 +160,13 @@
                     // Normalize tên sản phẩm trong danh sách
                     const normalizedProductName = normalizeProductName(product.goodsinfo);
 
-                    // So sánh tên đã normalize
-                    if (normalizedProductName === cleanProductName ||
-                        normalizedProductName.includes(cleanProductName) ||
-                        cleanProductName.includes(normalizedProductName)) {
+                    // So sánh tên đã normalize (case-insensitive)
+                    const normalizedLower = normalizedProductName.toLowerCase();
+                    const cleanLower = cleanProductName.toLowerCase();
+
+                    if (normalizedLower === cleanLower ||
+                        normalizedLower.includes(cleanLower) ||
+                        cleanLower.includes(normalizedLower)) {
                         result.product_id = product.goodsid;
                         // Kiểm tra category dựa trên product_id
                         if (wwmProductIds.includes(product.goodsid)) {
@@ -236,6 +257,10 @@
             if (text.trim()) {
                 const parsed = parseOrderData(text);
 
+                // Debug: log để kiểm tra
+                console.log('Parsed data:', parsed);
+                console.log('Input text:', text);
+
                 // Cập nhật hidden fields
                 orderIdInput.value = parsed.order_id;
                 uidInput.value = parsed.uid;
@@ -243,6 +268,7 @@
                 categoryInput.value = parsed.category;
                 serverInput.value = parsed.server;
                 regionInput.value = parsed.region;
+                purchaseDateInput.value = parsed.purchase_date || '';
 
                 // Cập nhật preview
                 updatePreview(parsed);
@@ -255,6 +281,7 @@
                 categoryInput.value = '';
                 serverInput.value = '';
                 regionInput.value = '';
+                purchaseDateInput.value = '';
             }
         }
 
@@ -323,6 +350,7 @@
                 categoryInput.value = '';
                 serverInput.value = '';
                 regionInput.value = '';
+                purchaseDateInput.value = '';
                 continueAddInput.value = '0';
                 parsedInfoDiv.style.display = 'none';
                 submitBtn.disabled = true;
