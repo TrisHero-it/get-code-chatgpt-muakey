@@ -15,10 +15,6 @@
 
 <body>
     <?php
-    error_reporting(E_ALL);
-    ini_set('display_errors', 1);
-
-    echo $abc; // biến chưa khai báo → lỗi
     require_once 'controllers/CodeController.php';
     require_once 'controllers/AccountController.php';
     require_once 'controllers/SteamController.php';
