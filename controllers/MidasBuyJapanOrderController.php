@@ -44,6 +44,8 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         $uid = $_POST['uid'] ?? '';
         $card = $_POST['card'] ?? '';
         $image = !empty(trim($_POST['image'] ?? '')) ? trim($_POST['image']) : null;
+        $order_id = !empty(trim($_POST['order_id'] ?? '')) ? trim($_POST['order_id']) : null;
+        $order_id = ($order_id !== null && is_numeric($order_id)) ? (int)$order_id : null;
 
         if (empty(trim($uid)) || !is_numeric($uid)) {
             header("Location: ?act=midas-japan-order-add&error=" . urlencode('UID phải là số và không được để trống!'));
@@ -60,11 +62,16 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
             exit;
         }
 
+        if ($order_id !== null && $order->checkOrderIdExists($order_id)) {
+            header("Location: ?act=midas-japan-order-add&error=" . urlencode('Mã đơn hàng (Order ID) "' . $order_id . '" đã tồn tại trong hệ thống!'));
+            exit;
+        }
+
         $status = $_POST['status'] ?? 'pending';
-        $validStatuses = ['pending', 'success'];
+        $validStatuses = ['pending', 'success', 'cancelled'];
         if (!in_array($status, $validStatuses)) $status = 'pending';
-        $order->insert($uid, $card, $image, $status);
-        header("Location: ?act=midas-japan-orders");
+        $order->insert($uid, $card, $image, $status, $order_id);
+        header("Location: ?act=midas-japan-order-add&success=" . urlencode('Đã thêm đơn hàng thành công!'));
     }
 
     public function edit($id)
@@ -88,6 +95,8 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         $uid = $_POST['uid'] ?? '';
         $card = $_POST['card'] ?? '';
         $image = !empty(trim($_POST['image'] ?? '')) ? trim($_POST['image']) : null;
+        $order_id = !empty(trim($_POST['order_id'] ?? '')) ? trim($_POST['order_id']) : null;
+        $order_id = ($order_id !== null && is_numeric($order_id)) ? (int)$order_id : null;
 
         if (empty($id)) {
             header("Location: ?act=midas-japan-orders&error=" . urlencode('ID đơn hàng không hợp lệ!'));
@@ -110,9 +119,9 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         }
 
         $status = $_POST['status'] ?? 'pending';
-        $validStatuses = ['pending', 'success'];
+        $validStatuses = ['pending', 'success', 'cancelled'];
         if (!in_array($status, $validStatuses)) $status = 'pending';
-        $order->update($id, $uid, $card, $image, $status);
+        $order->update($id, $uid, $card, $image, $status, $order_id);
         header("Location: ?act=midas-japan-orders");
     }
 

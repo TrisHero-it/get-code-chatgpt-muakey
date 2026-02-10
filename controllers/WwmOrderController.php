@@ -80,6 +80,161 @@ class WwmOrderController extends WwmOrder
         exit;
     }
 
+    /**
+     * Resolve product_name -> product_id (và category) theo danh sách getProducts() + productsOneHuman().
+     * Trả về ['product_id' => ..., 'category' => ...] hoặc null nếu không khớp.
+     */
+    private function resolveProductNameToId($productName)
+    {
+        if ($productName === null || trim((string)$productName) === '') return null;
+        $name = trim((string)$productName);
+        $normalize = function ($n) {
+            $n = preg_replace('/\s+x\s+\d+$/i', '', $n);
+            $n = preg_replace('/\s+(ID|Bản Mobile)\s*$/i', '', $n);
+            $n = preg_replace('/\s+(ID|Bản Mobile)\s*$/i', '', $n);
+            $n = preg_replace('/\s+Chỉ Cần ID\s*$/i', '', $n);
+            return trim($n);
+        };
+        $iosProducts = array_values(array_filter($this->getProducts(), function ($item) {
+            return isset($item['platform']) && $item['platform'] === 'ios';
+        }));
+        $productsOneHuman = $this->productsOneHuman();
+        $wwmProductIds = array_map(function ($p) {
+            return $p['goodsid'];
+        }, $iosProducts);
+        $oneHumanProductIds = array_map(function ($p) {
+            return $p['goodsid'];
+        }, $productsOneHuman);
+        $allProducts = array_merge($iosProducts, $productsOneHuman);
+        $cleanInput = $normalize($name);
+        $cleanLower = mb_strtolower($cleanInput, 'UTF-8');
+        foreach ($allProducts as $product) {
+            if (!isset($product['goodsinfo'])) continue;
+            $normalized = $normalize($product['goodsinfo']);
+            $normalizedLower = mb_strtolower($normalized, 'UTF-8');
+            if (
+                $normalizedLower === $cleanLower
+                || mb_strpos($normalizedLower, $cleanLower, 0, 'UTF-8') !== false
+                || mb_strpos($cleanLower, $normalizedLower, 0, 'UTF-8') !== false
+            ) {
+                $category = '';
+                if (in_array($product['goodsid'], $wwmProductIds)) $category = 'where winds meet';
+                elseif (in_array($product['goodsid'], $oneHumanProductIds)) $category = 'one human';
+                return ['product_id' => $product['goodsid'], 'category' => $category];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * API: Thêm WWM order(s) qua JSON (POST).
+     * Chấp nhận product_id hoặc product_name (sẽ map theo danh sách sản phẩm).
+     * Một đơn: { "order_id": "...", "uid": "...", "product_id": "..." } hoặc "product_name": "Monthly Pass Where Winds Meet Bản Mobile x 1"
+     * Nhiều đơn: { "orders": [ {...}, ... ] }
+     */
+    public function apiStore()
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method Not Allowed. Use POST.']);
+            return;
+        }
+
+        $raw = file_get_contents('php://input');
+        $data = json_decode($raw, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid JSON. Use { "order_id", "uid", "product_id" } or { "product_name": "..." } or { "orders": [ {...} ] }'
+            ]);
+            return;
+        }
+
+        $list = isset($data['orders']) && is_array($data['orders']) ? $data['orders'] : [$data];
+        $wwmOrder = new WwmOrder();
+        $iosProducts = array_values(array_filter($this->getProducts(), function ($item) {
+            return isset($item['platform']) && $item['platform'] === 'ios';
+        }));
+        $productsOneHuman = $this->productsOneHuman();
+        $wwmProductIds = array_map(function ($p) {
+            return $p['goodsid'];
+        }, $iosProducts);
+        $oneHumanProductIds = array_map(function ($p) {
+            return $p['goodsid'];
+        }, $productsOneHuman);
+
+        $inserted = 0;
+        $errors = [];
+
+        foreach ($list as $index => $item) {
+            $order_id = isset($item['order_id']) ? trim((string)$item['order_id']) : '';
+            $uid = isset($item['uid']) ? trim((string)$item['uid']) : '';
+            $product_id = isset($item['product_id']) ? trim((string)$item['product_id']) : '';
+            $product_name = isset($item['product_name']) ? trim((string)$item['product_name']) : '';
+            $category = isset($item['category']) ? trim((string)$item['category']) : '';
+            $server = isset($item['server']) ? trim((string)$item['server']) : '';
+            $region = isset($item['region']) ? trim((string)$item['region']) : '';
+
+            if ($order_id === '') {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'order_id is required'];
+                continue;
+            }
+            if ($uid === '') {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'uid is required'];
+                continue;
+            }
+            if (!preg_match('/^\d{10}$/', $uid)) {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'uid must be exactly 10 digits'];
+                continue;
+            }
+            if ($product_id === '' && $product_name !== '') {
+                $resolved = $this->resolveProductNameToId($product_name);
+                if ($resolved) {
+                    $product_id = $resolved['product_id'];
+                    if ($category === '' && $resolved['category'] !== '') {
+                        $category = $resolved['category'];
+                    }
+                } else {
+                    $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'product_name not found: ' . $product_name];
+                    continue;
+                }
+            }
+            if ($product_id === '') {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'product_id or product_name is required'];
+                continue;
+            }
+            if ($wwmOrder->checkOrderIdExists($order_id)) {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'order_id already exists'];
+                continue;
+            }
+
+            if ($category === '') {
+                if (in_array($product_id, $wwmProductIds)) {
+                    $category = 'where winds meet';
+                } elseif (in_array($product_id, $oneHumanProductIds)) {
+                    $category = 'one human';
+                }
+            }
+
+            try {
+                $wwmOrder->insert($order_id, $uid, $product_id, $category, $server, $region);
+                $inserted++;
+            } catch (\Throwable $e) {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => $e->getMessage()];
+            }
+        }
+
+        echo json_encode([
+            'success' => true,
+            'inserted' => $inserted,
+            'errors' => $errors
+        ]);
+    }
+
     private function parseOrderData($text)
     {
         $result = [

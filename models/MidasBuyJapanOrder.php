@@ -22,7 +22,7 @@ class MidasBuyJapanOrder extends db
     {
         $query = "SELECT COUNT(*) as total FROM orders ";
         if (isset($_GET['status']) && $_GET['status'] != '') {
-            $status = in_array($_GET['status'], ['pending', 'success']) ? $_GET['status'] : '';
+            $status = in_array($_GET['status'], ['pending', 'success', 'cancelled']) ? $_GET['status'] : '';
             if ($status) $query .= " WHERE status = '$status'";
         }
         $result = $this->getData4($query, false);
@@ -37,18 +37,28 @@ class MidasBuyJapanOrder extends db
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function insert($uid, $card, $image = null, $status = 'pending')
+    /** Kiểm tra order_id đã tồn tại chưa (bảng orders) */
+    public function checkOrderIdExists($order_id)
     {
+        if ($order_id === null || $order_id === '') return false;
         $pdo = $this->getConnect4();
-        $stmt = $pdo->prepare("INSERT INTO orders (uid, card, image, status) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$uid, $card, $image, $status]);
+        $stmt = $pdo->prepare("SELECT id FROM orders WHERE order_id = ?");
+        $stmt->execute([$order_id]);
+        return $stmt->fetch() ? true : false;
     }
 
-    public function update($id, $uid, $card, $image = null, $status = 'pending')
+    public function insert($uid, $card, $image = null, $status = 'pending', $order_id = null)
     {
         $pdo = $this->getConnect4();
-        $stmt = $pdo->prepare("UPDATE orders SET uid = ?, card = ?, image = ?, status = ? WHERE id = ?");
-        $stmt->execute([$uid, $card, $image, $status, $id]);
+        $stmt = $pdo->prepare("INSERT INTO orders (order_id, uid, card, image, status) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$order_id ?: null, $uid, $card, $image, $status]);
+    }
+
+    public function update($id, $uid, $card, $image = null, $status = 'pending', $order_id = null)
+    {
+        $pdo = $this->getConnect4();
+        $stmt = $pdo->prepare("UPDATE orders SET order_id = ?, uid = ?, card = ?, image = ?, status = ? WHERE id = ?");
+        $stmt->execute([$order_id ?: null, $uid, $card, $image, $status, $id]);
     }
 
     public function delete($id)

@@ -12,6 +12,7 @@
                 <option value="">Tất cả</option>
                 <option <?php echo isset($_GET['status']) && $_GET['status'] == 'pending' ? 'selected' : '' ?> value="pending">Đang chờ</option>
                 <option <?php echo isset($_GET['status']) && $_GET['status'] == 'success' ? 'selected' : '' ?> value="success">Thành công</option>
+                <option <?php echo isset($_GET['status']) && $_GET['status'] == 'cancelled' ? 'selected' : '' ?> value="cancelled">Đã huỷ</option>
             </select>
         </div>
     </div>
@@ -31,10 +32,12 @@
         <thead>
             <tr>
                 <th scope="col">ID</th>
+                <th scope="col">Order ID</th>
                 <th scope="col">UID</th>
                 <th scope="col">Card</th>
                 <th scope="col">Trạng thái</th>
                 <th scope="col">Image</th>
+                <th scope="col">Ngày tạo</th>
                 <th scope="col">Action</th>
             </tr>
         </thead>
@@ -43,16 +46,26 @@
             if (empty($orders)) {
             ?>
                 <tr>
-                    <td colspan="6" class="text-center">Không có đơn hàng nào</td>
+                    <td colspan="8" class="text-center">Không có đơn hàng nào</td>
                 </tr>
                 <?php
             } else {
                 foreach ($orders as $order) {
-                    $statusClass = ($order['status'] ?? '') == 'success' ? 'success' : 'warning';
-                    $statusText = ($order['status'] ?? 'pending') == 'success' ? 'Thành công' : 'Đang chờ';
+                    $s = $order['status'] ?? 'pending';
+                    if ($s === 'success') {
+                        $statusClass = 'success';
+                        $statusText = 'Thành công';
+                    } elseif ($s === 'cancelled') {
+                        $statusClass = 'secondary';
+                        $statusText = 'Đã huỷ';
+                    } else {
+                        $statusClass = 'warning';
+                        $statusText = 'Đang chờ';
+                    }
                 ?>
                     <tr>
                         <td><?php echo $order['id'] ?></td>
+                        <td><?php echo !empty($order['order_id']) ? htmlspecialchars($order['order_id']) : '<span class="text-muted">-</span>' ?></td>
                         <td><?php echo htmlspecialchars($order['uid'] ?? 'N/A') ?></td>
                         <td><strong><?php echo htmlspecialchars($order['card'] ?? 'N/A') ?></strong></td>
                         <td><span class="badge bg-<?php echo $statusClass ?>"><?php echo $statusText ?></span></td>
@@ -63,6 +76,7 @@
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
                         </td>
+                        <td><?php echo !empty($order['created_at']) ? date('d/m/Y H:i', strtotime($order['created_at'])) : '-' ?></td>
                         <td>
                             <div class="d-flex" style="gap: 5px;">
                                 <a href="?act=midas-japan-order-edit&id=<?php echo $order['id'] ?>" class="btn btn-warning btn-sm">

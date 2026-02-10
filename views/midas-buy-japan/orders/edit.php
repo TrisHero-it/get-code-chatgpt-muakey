@@ -11,6 +11,10 @@
     <form action="?act=midas-japan-order-update" method="post">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($order['id'] ?? '') ?>">
         <div class="form-group mt-3">
+            <label for="order_id">Mã đơn hàng (Order ID)</label>
+            <input type="text" class="form-control" id="order_id" name="order_id" placeholder="Mã đơn hàng từ MidasBuy (số, tùy chọn)" value="<?php echo htmlspecialchars($order['order_id'] ?? '') ?>">
+        </div>
+        <div class="form-group mt-3">
             <label for="uid">UID <span class="text-danger">*</span></label>
             <input type="number" class="form-control" id="uid" name="uid" placeholder="Nhập UID (số)" value="<?php echo htmlspecialchars($order['uid'] ?? '') ?>" required>
         </div>
@@ -27,6 +31,7 @@
             <select class="form-control" id="status" name="status">
                 <option value="pending" <?php echo (isset($order['status']) && $order['status'] == 'pending') ? 'selected' : '' ?>>Đang chờ</option>
                 <option value="success" <?php echo (isset($order['status']) && $order['status'] == 'success') ? 'selected' : '' ?>>Thành công</option>
+                <option value="cancelled" <?php echo (isset($order['status']) && $order['status'] == 'cancelled') ? 'selected' : '' ?>>Đã huỷ</option>
             </select>
         </div>
 

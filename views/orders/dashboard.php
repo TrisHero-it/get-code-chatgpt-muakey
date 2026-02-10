@@ -114,6 +114,31 @@
         </div>
     </div>
 
+    <div class="row mt-4" style="display: flex;">
+        <!-- Steam Region Change Card -->
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-globe fa-3x text-secondary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h4 class="card-title mb-0">Steam Region Change</h4>
+                            <p class="text-muted mb-0">Đổi vùng Steam</p>
+                        </div>
+                    </div>
+                    <p class="card-text">Quản lý và thực hiện đổi vùng cho tài khoản Steam.</p>
+                    <div class="d-grid gap-2">
+                        <a href="?act=orders" class="btn btn-secondary">
+                            <i class="fas fa-globe"></i> Đổi vùng Steam
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
