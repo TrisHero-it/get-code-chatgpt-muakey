@@ -86,6 +86,7 @@
                 <th scope="col">Product ID</th>
                 <th scope="col">Status</th>
                 <th scope="col">Category</th>
+                <th scope="col">Sales Agent ID</th>
                 <th scope="col">Ngày tạo</th>
                 <th scope="col">Action</th>
             </tr>
@@ -95,7 +96,7 @@
             if (empty($wwmOrders)) {
             ?>
                 <tr>
-                    <td colspan="9" class="text-center">Không có dữ liệu nào</td>
+                    <td colspan="10" class="text-center">Không có dữ liệu nào</td>
                 </tr>
                 <?php
             } else {
@@ -158,6 +159,7 @@
 
                         <td><span class="badge bg-<?php echo $statusClass ?>"><?php echo $statusText ?></span></td>
                         <td><?php echo htmlspecialchars($order['category'] ?? 'N/A') ?></td>
+                        <td><?php echo isset($order['sales_agent_id']) && $order['sales_agent_id'] !== null && $order['sales_agent_id'] !== '' ? (int)$order['sales_agent_id'] : '—' ?></td>
                         <td><?php echo isset($order['created_at']) ? date('d/m/Y H:i', strtotime($order['created_at'])) : 'N/A' ?></td>
                         <td>
                             <div class="d-flex" style="gap: 5px;">

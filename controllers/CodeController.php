@@ -21,8 +21,7 @@ class CodeController extends Account
                 $default = 0;
             } else {
                 $default = 1;
-                // $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Njc2MDA3NTksInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoic3RhdGlzdGljYWxreWxpZUBwdW5rcHJvb2YuY29tIiwiaWQiOiI2ODYyYWUwMWJlMzgxOTg4N2YwY2ZmZjAiLCJtZXJjdXJlIjp7InN1YnNjcmliZSI6WyIvYWNjb3VudHMvNjg2MmFlMDFiZTM4MTk4ODdmMGNmZmYwIl19fQ.uz2P3Grlx3L8BpWLDT0NSkTkLBQiCJSjmDsK207EfBG26iG19cYT42nm3g210XWjha7sIqW0pcoVK048bLWgeA";
-                $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3Njc2MDcxNzEsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoidHVuZ2FuaGJpZ2F5QGNvbWZ5dGhpbmdzLmNvbSIsImlkIjoiNjkzYmU4MjMwMGY4MDRmODEwMDk3MmJjIiwibWVyY3VyZSI6eyJzdWJzY3JpYmUiOlsiL2FjY291bnRzLzY5M2JlODIzMDBmODA0ZjgxMDA5NzJiYyJdfX0.IQTfV9C7AVmmog-NxX1Ye0S5v8UTqG8_BtaO3kkeybzeq7BDMJLEMujHC8NS2hRgyamlOlFQy-jX8QveOfe56A";
+                $token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE3NjQwNjYyODAsInJvbGVzIjpbIlJPTEVfVVNFUiJdLCJhZGRyZXNzIjoib25nYmFjb20xMjNAMjIwMGZyZWVmb250cy5jb20iLCJpZCI6IjY5MGQ5OGUyMjM5NjJjZWZiZDA3ZWMzNCIsIm1lcmN1cmUiOnsic3Vic2NyaWJlIjpbIi9hY2NvdW50cy82OTBkOThlMjIzOTYyY2VmYmQwN2VjMzQiXX19.WEkQyL3QgYDWrZAloY3Ji6jM46_bWFOZF5qN4DlV5nxW50JFFr3_uNNf56TdgSsXREGGXNl3e-YleFm-SVhmUA";
             }
         } else {
             require_once "views/index.php";

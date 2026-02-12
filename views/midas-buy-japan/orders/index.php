@@ -72,7 +72,7 @@
                 <th scope="col">UID</th>
                 <th scope="col">Card</th>
                 <th scope="col">Trạng thái</th>
-                <th scope="col">Image</th>
+                <th scope="col">Sales Agent ID</th>
                 <th scope="col">Ngày tạo</th>
                 <th scope="col">Action</th>
             </tr>
@@ -108,16 +108,43 @@
                         <td><?php echo htmlspecialchars($order['uid'] ?? 'N/A') ?></td>
                         <td><strong><?php echo htmlspecialchars($order['card'] ?? 'N/A') ?></strong></td>
                         <td><span class="badge bg-<?php echo $statusClass ?>"><?php echo $statusText ?></span></td>
-                        <td>
-                            <?php if (!empty($order['image'])): ?>
-                                <a href="<?php echo htmlspecialchars($order['image']) ?>" target="_blank" class="btn btn-sm btn-outline-secondary">Xem ảnh</a>
-                            <?php else: ?>
-                                <span class="text-muted">-</span>
-                            <?php endif; ?>
-                        </td>
+                        <td><?php echo isset($order['sales_agent_id']) && $order['sales_agent_id'] !== null && $order['sales_agent_id'] !== '' ? (int)$order['sales_agent_id'] : '—' ?></td>
                         <td><?php echo !empty($order['created_at']) ? date('d/m/Y H:i', strtotime($order['created_at'])) : '-' ?></td>
                         <td>
                             <div class="d-flex" style="gap: 5px;">
+                                <?php if (!empty($order['image'])): ?>
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="Xem ảnh"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#imageModal<?php echo $order['id'] ?>">
+                                        <i class="fas fa-image"></i>
+                                    </button>
+
+                                    <!-- Modal hiển thị ảnh -->
+                                    <div class="modal fade" id="imageModal<?php echo $order['id'] ?>" tabindex="-1" aria-labelledby="imageModalLabel<?php echo $order['id'] ?>" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="imageModalLabel<?php echo $order['id'] ?>">Ảnh đơn hàng #<?php echo $order['id'] ?></h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <img src="<?php echo htmlspecialchars($order['image']) ?>"
+                                                        class="img-fluid"
+                                                        alt="Ảnh đơn hàng"
+                                                        style="max-height: 70vh; border-radius: 8px;">
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a href="<?php echo htmlspecialchars($order['image']) ?>" target="_blank" class="btn btn-primary">
+                                                        <i class="fas fa-external-link-alt"></i> Mở trong tab mới
+                                                    </a>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                                 <a href="?act=midas-japan-order-edit&id=<?php echo $order['id'] ?>" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>

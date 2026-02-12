@@ -55,6 +55,7 @@ if (isset($_GET['act'])) {
             $wwmOrderController->checkStatusOrders($orderId);
             break;
         case 'wwm-orders-store':
+            // POST JSON: { "order_id", "uid", "product_id" hoặc "product_name", "sales_agent_id" (tùy chọn), ... } hoặc { "orders": [...] }
             if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
                 header('Content-Type: application/json; charset=utf-8');
                 http_response_code(405);
@@ -66,6 +67,23 @@ if (isset($_GET['act'])) {
         case 'get-midas-japan-orders':
             $midasJapanOrderController = new MidasBuyJapanOrderController();
             $midasJapanOrderController->getOrders();
+            break;
+        case 'get-midas-japan-order-image':
+            $midasJapanOrderController = new MidasBuyJapanOrderController();
+            $midasJapanOrderController->getOrderImage();
+            break;
+
+            break;
+        case 'midas-buy-japan-store':
+            // POST JSON: { "order_id", "uid", "card", "sales_agent_id" (tùy chọn), "image", "status" }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Method Not Allowed. POST required']);
+                exit;
+            }
+            $midasJapanOrderController = new MidasBuyJapanOrderController();
+            $midasJapanOrderController->apiStore();
             break;
         case 'update-wwm-order':
             $input = json_decode(file_get_contents('php://input'), true) ?: [];

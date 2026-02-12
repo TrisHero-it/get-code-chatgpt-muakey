@@ -17,11 +17,11 @@ class WwmOrder extends db
     /**
      * Thêm bản ghi mới vào bảng wwm_orders
      */
-    public function insert($order_id, $uid, $product_id, $category = '', $server = '', $region = '')
+    public function insert($order_id, $uid, $product_id, $category = '', $server = '', $region = '', $sales_agent_id = null)
     {
         $pdo = $this->getConnect();
-        $stmt = $pdo->prepare("INSERT INTO wwm_orders (order_id, uid, product_id, category, server, region, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())");
-        $stmt->execute([$order_id, $uid, $product_id, $category, $server, $region]);
+        $stmt = $pdo->prepare("INSERT INTO wwm_orders (order_id, uid, product_id, category, server, region, sales_agent_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([$order_id, $uid, $product_id, $category, $server, $region, $sales_agent_id]);
     }
 
     /**
@@ -171,19 +171,19 @@ class WwmOrder extends db
     }
 
     /**
-     * Cập nhật wwm_order với đầy đủ thông tin bao gồm image
+     * Cập nhật wwm_order với đầy đủ thông tin bao gồm image và sales_agent_id
      */
-    public function updateOrderFull($id, $order_id, $uid, $product_id, $category = '', $server = '', $region = '', $status = null, $image = null)
+    public function updateOrderFull($id, $order_id, $uid, $product_id, $category = '', $server = '', $region = '', $status = null, $image = null, $sales_agent_id = null)
     {
         $pdo = $this->getConnect();
 
         // Nếu status không được truyền vào (null), thì không cập nhật status
         if ($status === null) {
-            $stmt = $pdo->prepare("UPDATE wwm_orders SET order_id = ?, uid = ?, product_id = ?, category = ?, server = ?, region = ?, image = ? WHERE id = ?");
-            $stmt->execute([$order_id, $uid, $product_id, $category, $server, $region, $image, $id]);
+            $stmt = $pdo->prepare("UPDATE wwm_orders SET order_id = ?, uid = ?, product_id = ?, category = ?, server = ?, region = ?, image = ?, sales_agent_id = ? WHERE id = ?");
+            $stmt->execute([$order_id, $uid, $product_id, $category, $server, $region, $image, $sales_agent_id, $id]);
         } else {
-            $stmt = $pdo->prepare("UPDATE wwm_orders SET order_id = ?, uid = ?, product_id = ?, category = ?, server = ?, region = ?, status = ?, image = ? WHERE id = ?");
-            $stmt->execute([$order_id, $uid, $product_id, $category, $server, $region, $status, $image, $id]);
+            $stmt = $pdo->prepare("UPDATE wwm_orders SET order_id = ?, uid = ?, product_id = ?, category = ?, server = ?, region = ?, status = ?, image = ?, sales_agent_id = ? WHERE id = ?");
+            $stmt->execute([$order_id, $uid, $product_id, $category, $server, $region, $status, $image, $sales_agent_id, $id]);
         }
     }
 

@@ -94,35 +94,50 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                 (mb_strtolower($item['to'][0]['address'], 'UTF-8') == $email && $item['from']['name'] == 'Netflix')
                                             ) {
                                     ?>
-                                                <tr>
+                                                <tr id="row<?php echo htmlspecialchars($item['@id'], ENT_QUOTES, 'UTF-8') ?>" style="display: none;">
                                                     <td>
                                                         <span class="badge badge-dot mr-4" style="color: green;">
                                                             <?php
-                                                            if ($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) {
-                                                                echo "<span id='code" . $item['@id'] . "'></span>";
+                                                            if ($item['from']['name'] == 'Netflix' && strtolower($item['to'][0]['address']) == strtolower($email)) {
+                                                                echo "<span id='code" . htmlspecialchars($item['@id'], ENT_QUOTES, 'UTF-8') . "'></span>";
 
                                                                 $text = $item['intro'];
                                                             ?>
                                                                 <script>
-                                                                    $.ajax({
-                                                                        url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
-                                                                        method: "GET",
-                                                                        headers: {
-                                                                            "Authorization": "Bearer <?php echo $token ?>"
-                                                                        },
-                                                                        success: function(response) {
-                                                                            const html = response.html[0];
-                                                                            const parser = new DOMParser();
-                                                                            const doc = parser.parseFromString(html, 'text/html');
-                                                                            const aTag = doc.querySelector('a.h5[href*="netflix.com/account/travel/verify"]');
+                                                                    (function() {
+                                                                        var rowId = <?php echo json_encode('row' . $item['@id']) ?>;
+                                                                        var codeId = <?php echo json_encode('code' . $item['@id']) ?>;
+                                                                        $.ajax({
+                                                                            url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
+                                                                            method: "GET",
+                                                                            headers: {
+                                                                                "Authorization": "Bearer <?php echo $token ?>"
+                                                                            },
+                                                                            success: function(response) {
+                                                                                var row = document.getElementById(rowId);
+                                                                                if (!row) return;
+                                                                                var html = response.html && response.html[0];
+                                                                                if (!html) {
+                                                                                    row.remove();
+                                                                                    return;
+                                                                                }
+                                                                                var parser = new DOMParser();
+                                                                                var doc = parser.parseFromString(html, 'text/html');
+                                                                                var aTag = doc.querySelector('a.h5[href*="netflix.com/account/travel/verify"]');
 
-                                                                            if (aTag) {
-                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `<a class="btn btn-primary" href="${aTag.href}"> click here </a>`;
-                                                                            } else {
-                                                                                document.getElementById('code<?php echo $item['@id'] ?>').innerHTML = `ERROR NOT FOUND`;
+                                                                                if (aTag) {
+                                                                                    row.style.display = '';
+                                                                                    document.getElementById(codeId).innerHTML = '<a class="btn btn-primary" href=' + JSON.stringify(aTag.href) + '> Click here </a>';
+                                                                                } else {
+                                                                                    row.remove();
+                                                                                }
+                                                                            },
+                                                                            error: function() {
+                                                                                var row = document.getElementById(rowId);
+                                                                                if (row) row.remove();
                                                                             }
-                                                                        }
-                                                                    });
+                                                                        });
+                                                                    })();
                                                                 </script>
 
                                                             <?php

@@ -100,18 +100,19 @@ class MidasBuyJapanOrder extends db
         return $stmt->fetch() ? true : false;
     }
 
-    public function insert($uid, $card, $image = null, $status = 'pending', $order_id = null)
+    public function insert($uid, $card, $image = null, $status = 'pending', $order_id = null, $sales_agent_id = null)
     {
         $pdo = $this->getConnect4();
-        $stmt = $pdo->prepare("INSERT INTO orders (order_id, uid, card, image, status) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$order_id ?: null, $uid, $card, $image, $status]);
+        $stmt = $pdo->prepare("INSERT INTO orders (order_id, uid, card, image, status, sales_agent_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$order_id ?: null, $uid, $card, $image, $status, $sales_agent_id]);
+        return $pdo->lastInsertId();
     }
 
-    public function update($id, $uid, $card, $image = null, $status = 'pending', $order_id = null)
+    public function update($id, $uid, $card, $image = null, $status = 'pending', $order_id = null, $sales_agent_id = null)
     {
         $pdo = $this->getConnect4();
-        $stmt = $pdo->prepare("UPDATE orders SET order_id = ?, uid = ?, card = ?, image = ?, status = ? WHERE id = ?");
-        $stmt->execute([$order_id ?: null, $uid, $card, $image, $status, $id]);
+        $stmt = $pdo->prepare("UPDATE orders SET order_id = ?, uid = ?, card = ?, image = ?, status = ?, sales_agent_id = ? WHERE id = ?");
+        $stmt->execute([$order_id ?: null, $uid, $card, $image, $status, $sales_agent_id, $id]);
     }
 
     public function delete($id)
