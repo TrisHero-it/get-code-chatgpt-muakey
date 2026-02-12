@@ -31,6 +31,10 @@
             </select>
         </div>
         <div class="form-group mt-3">
+            <label for="sales_agent_id">Sales Agent ID <span class="text-muted">(Tùy chọn)</span></label>
+            <input type="number" class="form-control" id="sales_agent_id" name="sales_agent_id" placeholder="Để trống nếu không có" value="<?php echo isset($order['sales_agent_id']) && $order['sales_agent_id'] !== '' && $order['sales_agent_id'] !== null ? (int)$order['sales_agent_id'] : '' ?>" min="1" step="1" style="max-width: 200px;">
+        </div>
+        <div class="form-group mt-3">
             <label for="status">Trạng thái <span class="text-danger">*</span></label>
             <select class="form-control" id="status" name="status">
                 <option value="">Trạng thái khác</option>

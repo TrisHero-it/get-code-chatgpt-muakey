@@ -8,7 +8,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
-    <form action="?act=midas-japan-order-update" method="post">
+    <form action="?act=midas-japan-order-update" method="post" enctype="multipart/form-data">
         <input type="hidden" name="id" value="<?php echo htmlspecialchars($order['id'] ?? '') ?>">
         <div class="form-group mt-3">
             <label for="order_id">Mã đơn hàng (Order ID)</label>
@@ -23,8 +23,21 @@
             <input type="text" class="form-control" id="card" name="card" placeholder="Nhập card (tối đa 30 ký tự)" maxlength="30" value="<?php echo htmlspecialchars($order['card'] ?? '') ?>" required>
         </div>
         <div class="form-group mt-3">
-            <label for="image">Image (URL hoặc text)</label>
-            <input type="text" class="form-control" id="image" name="image" placeholder="Nhập URL ảnh hoặc để trống" value="<?php echo htmlspecialchars($order['image'] ?? '') ?>">
+            <label for="sales_agent_id">Sales Agent ID <span class="text-muted">(Tùy chọn)</span></label>
+            <input type="number" class="form-control" id="sales_agent_id" name="sales_agent_id" placeholder="Để trống nếu không có" value="<?php echo isset($order['sales_agent_id']) && $order['sales_agent_id'] !== '' && $order['sales_agent_id'] !== null ? (int)$order['sales_agent_id'] : '' ?>" min="1" step="1" style="max-width: 200px;">
+        </div>
+        <div class="form-group mt-3">
+            <label for="image">Image</label>
+            <?php if (!empty($order['image'])): ?>
+                <div class="mb-2">
+                    <small class="text-muted">Ảnh hiện tại:</small><br>
+                    <a href="<?php echo htmlspecialchars($order['image']) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> Xem ảnh hiện tại
+                    </a>
+                </div>
+            <?php endif; ?>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <small class="form-text text-muted">Chọn file ảnh mới để thay thế (để trống nếu giữ nguyên ảnh hiện tại)</small>
         </div>
         <div class="form-group mt-3">
             <label for="status">Trạng thái</label>

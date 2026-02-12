@@ -43,6 +43,10 @@
             <input type="text" class="form-control" id="image" name="image" placeholder="Nhập URL ảnh hoặc để trống">
         </div>
         <div class="form-group mt-3">
+            <label for="sales_agent_id">Sales Agent ID <span class="text-muted">(Tùy chọn)</span></label>
+            <input type="number" class="form-control" id="sales_agent_id" name="sales_agent_id" placeholder="Nhập ID đại lý (để trống nếu không có)" value="" min="1" step="1" style="max-width: 200px;">
+        </div>
+        <div class="form-group mt-3">
             <label for="status">Trạng thái</label>
             <select class="form-control" id="status" name="status">
                 <option value="pending">Đang chờ</option>

@@ -33,6 +33,11 @@
         <input type="hidden" id="purchase_date" name="purchase_date" value="">
         <input type="hidden" id="continue_add" name="continue_add" value="0">
 
+        <div class="form-group mt-3">
+            <label for="sales_agent_id">Sales Agent ID <span class="text-muted">(Tùy chọn)</span></label>
+            <input type="number" class="form-control" id="sales_agent_id" name="sales_agent_id" placeholder="Nhập ID đại lý (để trống nếu không có)" value="" min="1" step="1" style="max-width: 200px;">
+        </div>
+
         <!-- Preview thông tin đã parse -->
         <div id="parsedInfo" class="alert alert-info mt-3" style="display: none;">
             <h6>Thông tin đã nhận diện:</h6>

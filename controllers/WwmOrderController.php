@@ -50,6 +50,10 @@ class WwmOrderController extends WwmOrder
             $region = $_POST['region'] ?? '';
         }
 
+        $sales_agent_id = isset($_POST['sales_agent_id']) && $_POST['sales_agent_id'] !== '' && is_numeric($_POST['sales_agent_id'])
+            ? (int)$_POST['sales_agent_id']
+            : null;
+
         $order_id = trim($order_id);
         $uid = trim($uid);
         $product_id = trim($product_id);
@@ -75,7 +79,7 @@ class WwmOrderController extends WwmOrder
             exit;
         }
 
-        $this->insert($order_id, $uid, $product_id, $category, $server, $region);
+        $this->insert($order_id, $uid, $product_id, $category, $server, $region, $sales_agent_id);
 
         // Kiểm tra xem có muốn tiếp tục thêm không
         $continue_add = isset($_POST['continue_add']) && $_POST['continue_add'] == '1';
@@ -137,7 +141,7 @@ class WwmOrderController extends WwmOrder
     /**
      * API: Thêm WWM order(s) qua JSON (POST).
      * Chấp nhận product_id hoặc product_name (sẽ map theo danh sách sản phẩm).
-     * Một đơn: { "order_id": "...", "uid": "...", "product_id": "..." } hoặc "product_name": "Monthly Pass Where Winds Meet Bản Mobile x 1"
+     * Một đơn: { "order_id", "uid", "product_id" hoặc "product_name", "category", "server", "region", "sales_agent_id" (tùy chọn) }
      * Nhiều đơn: { "orders": [ {...}, ... ] }
      */
     public function apiStore()
@@ -186,6 +190,9 @@ class WwmOrderController extends WwmOrder
             $category = isset($item['category']) ? trim((string)$item['category']) : '';
             $server = isset($item['server']) ? trim((string)$item['server']) : '';
             $region = isset($item['region']) ? trim((string)$item['region']) : '';
+            $sales_agent_id = isset($item['sales_agent_id']) && $item['sales_agent_id'] !== '' && is_numeric($item['sales_agent_id'])
+                ? (int)$item['sales_agent_id']
+                : null;
 
             if ($order_id === '') {
                 $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'order_id is required'];
@@ -196,7 +203,7 @@ class WwmOrderController extends WwmOrder
                 continue;
             }
             if (!preg_match('/^\d{10}$/', $uid)) {
-                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'uid must be exactly 10 digits'];
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'uid phải là 10 số'];
                 continue;
             }
             if ($product_id === '' && $product_name !== '') {
@@ -216,7 +223,7 @@ class WwmOrderController extends WwmOrder
                 continue;
             }
             if ($wwmOrder->checkOrderIdExists($order_id)) {
-                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'order_id already exists'];
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'Mã đơn hàng đã tồn tại'];
                 continue;
             }
 
@@ -229,18 +236,25 @@ class WwmOrderController extends WwmOrder
             }
 
             try {
-                $wwmOrder->insert($order_id, $uid, $product_id, $category, $server, $region);
+                $wwmOrder->insert($order_id, $uid, $product_id, $category, $server, $region, $sales_agent_id);
                 $inserted++;
             } catch (\Throwable $e) {
                 $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => $e->getMessage()];
             }
         }
-
-        echo json_encode([
-            'success' => true,
-            'inserted' => $inserted,
-            'errors' => $errors
-        ]);
+        if (isset($errors)) {
+            http_response_code(400);
+            echo json_encode([
+                'success' => false,
+                'errors' => $errors[0]['message']
+            ]);
+        } else {
+            echo json_encode([
+                'success' => true,
+                'inserted' => $inserted,
+                'errors' => $errors
+            ]);
+        }
     }
 
     private function parseOrderData($text)
@@ -579,6 +593,9 @@ class WwmOrderController extends WwmOrder
         $category = $_POST['category'] ?? '';
         $server = $_POST['server'] ?? '';
         $region = $_POST['region'] ?? '';
+        $sales_agent_id = isset($_POST['sales_agent_id']) && $_POST['sales_agent_id'] !== '' && is_numeric($_POST['sales_agent_id'])
+            ? (int)$_POST['sales_agent_id']
+            : null;
 
         // Nếu không có category từ POST, tự động xác định category dựa trên product_id
         if (empty($category)) {
@@ -693,14 +710,14 @@ class WwmOrderController extends WwmOrder
 
         // Nếu status rỗng thì không cập nhật status
         if (empty($status)) {
-            $wwmOrder->updateOrderFull($id, $order_id, $uid, $product_id, $category, $server, $region, null, $image);
+            $wwmOrder->updateOrderFull($id, $order_id, $uid, $product_id, $category, $server, $region, null, $image, $sales_agent_id);
         } else {
             // Validate status phải là một trong các giá trị hợp lệ
             $validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
             if (!in_array($status, $validStatuses)) {
                 $status = 'pending';
             }
-            $wwmOrder->updateOrderFull($id, $order_id, $uid, $product_id, $category, $server, $region, $status, $image);
+            $wwmOrder->updateOrderFull($id, $order_id, $uid, $product_id, $category, $server, $region, $status, $image, $sales_agent_id);
         }
 
         header("Location: ?act=wwm-orders");
