@@ -13,6 +13,7 @@
                 <option <?php echo isset($_GET['status']) && $_GET['status'] == 'pending' ? 'selected' : '' ?> value="pending">Đang chờ</option>
                 <option <?php echo isset($_GET['status']) && $_GET['status'] == 'success' ? 'selected' : '' ?> value="success">Thành công</option>
                 <option <?php echo isset($_GET['status']) && $_GET['status'] == 'cancelled' ? 'selected' : '' ?> value="cancelled">Đã huỷ</option>
+                <option <?php echo isset($_GET['status']) && $_GET['status'] == 'refunded' ? 'selected' : '' ?> value="refunded">Đã hoàn tiền</option>
             </select>
         </div>
     </div>
@@ -28,6 +29,41 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     <?php endif; ?>
+
+    <!-- Form tìm kiếm -->
+    <div class="card mt-3 mb-3">
+        <div class="card-body">
+            <form method="GET" action="" class="d-flex gap-2 align-items-end">
+                <input type="hidden" name="act" value="midas-japan-orders">
+                <?php if (isset($_GET['status']) && $_GET['status'] != ''): ?>
+                    <input type="hidden" name="status" value="<?php echo htmlspecialchars($_GET['status']) ?>">
+                <?php endif; ?>
+                <div class="flex-grow-1">
+                    <label for="search" class="form-label">Tìm kiếm đơn hàng</label>
+                    <input type="text"
+                        class="form-control"
+                        id="search"
+                        name="search"
+                        placeholder="Nhập Order ID, UID hoặc Card..."
+                        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Tìm kiếm
+                    </button>
+                    <?php if (isset($_GET['search']) && $_GET['search'] != ''): ?>
+                        <?php
+                        $statusParam = isset($_GET['status']) && $_GET['status'] != '' ? '&status=' . htmlspecialchars($_GET['status']) : '';
+                        ?>
+                        <a href="?act=midas-japan-orders<?php echo $statusParam ?>" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Xóa
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <table class="table mt-3">
         <thead>
             <tr>
@@ -58,6 +94,9 @@
                     } elseif ($s === 'cancelled') {
                         $statusClass = 'secondary';
                         $statusText = 'Đã huỷ';
+                    } elseif ($s === 'refunded') {
+                        $statusClass = 'info';
+                        $statusText = 'Đã hoàn tiền';
                     } else {
                         $statusClass = 'warning';
                         $statusText = 'Đang chờ';
@@ -82,6 +121,11 @@
                                 <a href="?act=midas-japan-order-edit&id=<?php echo $order['id'] ?>" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
+                                <?php if ($s === 'cancelled'): ?>
+                                    <a onclick="return confirm('Bạn có chắc chắn muốn hoàn tiền cho đơn hàng này không?')" href="?act=midas-japan-order-refund&id=<?php echo $order['id'] ?>" class="btn btn-info btn-sm">
+                                        <i class="fas fa-money-bill-wave"></i> Hoàn tiền
+                                    </a>
+                                <?php endif; ?>
                                 <a onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?')" href="?act=midas-japan-order-delete&id=<?php echo $order['id'] ?>" class="btn btn-danger btn-sm">Delete</a>
                             </div>
                         </td>
@@ -100,11 +144,12 @@
                 <?php
                 $currentPage = isset($currentPage) ? $currentPage : (isset($_GET['page']) ? (int)$_GET['page'] : 1);
                 $statusParam = isset($_GET['status']) && $_GET['status'] != '' ? '&status=' . htmlspecialchars($_GET['status']) : '';
+                $searchParam = isset($_GET['search']) && $_GET['search'] != '' ? '&search=' . urlencode($_GET['search']) : '';
 
                 if ($currentPage > 1):
                 ?>
                     <li class="page-item">
-                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $currentPage - 1 ?><?php echo $statusParam ?>">Trước</a>
+                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $currentPage - 1 ?><?php echo $statusParam ?><?php echo $searchParam ?>">Trước</a>
                     </li>
                 <?php else: ?>
                     <li class="page-item disabled">
@@ -119,7 +164,7 @@
                 if ($startPage > 1):
                 ?>
                     <li class="page-item">
-                        <a class="page-link" href="?act=midas-japan-orders&page=1<?php echo $statusParam ?>">1</a>
+                        <a class="page-link" href="?act=midas-japan-orders&page=1<?php echo $statusParam ?><?php echo $searchParam ?>">1</a>
                     </li>
                     <?php if ($startPage > 2): ?>
                         <li class="page-item disabled">
@@ -130,7 +175,7 @@
 
                 <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                     <li class="page-item <?php echo $i == $currentPage ? 'active' : '' ?>">
-                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $i ?><?php echo $statusParam ?>"><?php echo $i ?></a>
+                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $i ?><?php echo $statusParam ?><?php echo $searchParam ?>"><?php echo $i ?></a>
                     </li>
                 <?php endfor; ?>
 
@@ -141,13 +186,13 @@
                         </li>
                     <?php endif; ?>
                     <li class="page-item">
-                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $totalPages ?><?php echo $statusParam ?>"><?php echo $totalPages ?></a>
+                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $totalPages ?><?php echo $statusParam ?><?php echo $searchParam ?>"><?php echo $totalPages ?></a>
                     </li>
                 <?php endif; ?>
 
                 <?php if ($currentPage < $totalPages): ?>
                     <li class="page-item">
-                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $currentPage + 1 ?><?php echo $statusParam ?>">Sau</a>
+                        <a class="page-link" href="?act=midas-japan-orders&page=<?php echo $currentPage + 1 ?><?php echo $statusParam ?><?php echo $searchParam ?>">Sau</a>
                     </li>
                 <?php else: ?>
                     <li class="page-item disabled">

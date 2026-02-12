@@ -68,7 +68,7 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         }
 
         $status = $_POST['status'] ?? 'pending';
-        $validStatuses = ['pending', 'success', 'cancelled'];
+        $validStatuses = ['pending', 'success', 'cancelled', 'refunded'];
         if (!in_array($status, $validStatuses)) $status = 'pending';
         $order->insert($uid, $card, $image, $status, $order_id);
         header("Location: ?act=midas-japan-order-add&success=" . urlencode('Đã thêm đơn hàng thành công!'));
@@ -119,7 +119,7 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         }
 
         $status = $_POST['status'] ?? 'pending';
-        $validStatuses = ['pending', 'success', 'cancelled'];
+        $validStatuses = ['pending', 'success', 'cancelled', 'refunded'];
         if (!in_array($status, $validStatuses)) $status = 'pending';
         $order->update($id, $uid, $card, $image, $status, $order_id);
         header("Location: ?act=midas-japan-orders");
@@ -130,5 +130,24 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         $order = new MidasBuyJapanOrder();
         $order->delete($id);
         header("Location: ?act=midas-japan-orders");
+    }
+
+    public function refund($id)
+    {
+        $order = new MidasBuyJapanOrder();
+        $orderData = $order->getOrderById($id);
+
+        if (!$orderData) {
+            header("Location: ?act=midas-japan-orders&error=" . urlencode('Không tìm thấy đơn hàng!'));
+            exit;
+        }
+
+        if ($orderData['status'] !== 'cancelled') {
+            header("Location: ?act=midas-japan-orders&error=" . urlencode('Chỉ có thể hoàn tiền cho đơn hàng đã huỷ!'));
+            exit;
+        }
+
+        $order->updateStatus($id, 'refunded');
+        header("Location: ?act=midas-japan-orders&success=" . urlencode('Đã hoàn tiền thành công!'));
     }
 }

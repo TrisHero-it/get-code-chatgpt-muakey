@@ -25,9 +25,9 @@ class db
         $stmt = $conn->prepare($query);
         $stmt->execute();
         if ($getAll) {
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     function getData2($query, $getAll = true)

@@ -24,115 +24,22 @@ if (
 $steamController = new SteamController();
 $wwmOrderController = new WwmOrderController();
 
-// REST: route từ /api/xxx (rewrite -> api.php?route=xxx)
-$route = isset($_GET['route']) ? trim($_GET['route'], '/') : '';
-$method = $_SERVER['REQUEST_METHOD'];
-
-// Phân tách route có id: wwm-orders/123 -> resource=wwm-orders, id=123
-$pathParts = $route ? explode('/', $route) : [];
-$resource = $pathParts[0] ?? '';
-$resourceId = isset($pathParts[1]) && $pathParts[1] !== '' ? $pathParts[1] : null;
-$sub = isset($pathParts[1]) ? $pathParts[1] : null;
-
-if ($resource === 'wwm-orders') {
-    if ($resourceId && $resourceId !== 'check-uid') {
-        // PUT/PATCH /api/wwm-orders/{id}
-        if (in_array($method, ['PUT', 'PATCH'])) {
-            $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-            $status = $input['status'] ?? $_GET['status'] ?? null;
-            if ($status !== null) {
-                $wwmOrderController->updateOrder($resourceId, $status);
-            } else {
-                header('Content-Type: application/json; charset=utf-8');
-                http_response_code(400);
-                echo json_encode(['success' => false, 'message' => 'status required']);
-            }
-            exit;
-        }
-    }
-    if ($sub === 'check-uid') {
-        // GET /api/wwm-orders/check-uid?uid=xxx
-        if ($method === 'GET') {
-            header('Content-Type: application/json');
-            $uid = $_GET['uid'] ?? '';
-            $url = 'https://pay.neteasegames.com/gameclub/wherewindsmeet/-1/login-role';
-            $params = [
-                'deviceid' => 208134903679537732,
-                'traceid' => '0b6f9253-6974-4744-ab87-99a1c05f4723',
-                'timestamp' => (string)(round(microtime(true) * 1000)),
-                'gc_client_version' => '1.12.5',
-                'roleid' => $uid,
-                'client_type' => 'gameclub',
-            ];
-            $ch = curl_init($url . '?' . http_build_query($params));
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HTTPHEADER => ['User-Agent: Mozilla/5.0', 'Referer: https://pay.neteasegames.com/'],
-            ]);
-            echo curl_exec($ch);
-            curl_close($ch);
-        } else {
-            header('Content-Type: application/json; charset=utf-8');
-            http_response_code(405);
-            echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
-        }
-        exit;
-    }
-    if ($method === 'GET') {
-        $wwmOrderController->getOrders();
-        exit;
-    }
-    if ($method === 'POST') {
-        $wwmOrderController->apiStore();
-        exit;
-    }
-    header('Content-Type: application/json; charset=utf-8');
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
-    exit;
-}
-
-if ($resource === 'steam-orders') {
-    if ($method === 'GET') {
-        $steamController->getOrders();
-        exit;
-    }
-    if ($method === 'PUT' || $method === 'PATCH') {
-        $input = json_decode(file_get_contents('php://input'), true) ?: $_POST;
-        $id = $resourceId ?? ($input['id'] ?? $_GET['id'] ?? null);
-        $status = $input['status'] ?? $_GET['status'] ?? null;
-        if ($id !== null && $status !== null) {
-            $steamController->updateOrder($id, $status);
-        } else {
-            header('Content-Type: application/json; charset=utf-8');
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'id and status required']);
-        }
-        exit;
-    }
-    header('Content-Type: application/json; charset=utf-8');
-    http_response_code(405);
-    echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
-    exit;
-}
-
-if ($resource === 'midas-japan-orders' && $method === 'GET') {
-    $midasJapanOrderController = new MidasBuyJapanOrderController();
-    $midasJapanOrderController->getOrders();
-    exit;
-}
-
-// Fallback: gọi theo ?act= (giữ tương thích cũ)
-if ($route === '' && isset($_GET['act'])) {
+// Xử lý theo ?act=
+if (isset($_GET['act'])) {
     switch ($_GET['act']) {
         case 'get-steam':
             $steamController->getOrders();
             break;
         case 'update-steam':
-            $id = $_GET['id'] ?? ($_POST['id'] ?? null);
-            $status = $_GET['status'] ?? ($_POST['status'] ?? null);
+            $input = json_decode(file_get_contents('php://input'), true) ?: [];
+            $id = $_GET['id'] ?? ($_POST['id'] ?? ($input['id'] ?? null));
+            $status = $_GET['status'] ?? ($_POST['status'] ?? ($input['status'] ?? null));
             if ($id !== null && $status !== null) {
                 $steamController->updateOrder($id, $status);
+            } else {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'id and status required']);
             }
             break;
         case 'update-money':
@@ -142,7 +49,18 @@ if ($route === '' && isset($_GET['act'])) {
         case 'get-wwm-orders':
             $wwmOrderController->getOrders();
             break;
+
+        case 'check-status-wwm-orders':
+            $orderId = $_GET['order_id'] ?? '';
+            $wwmOrderController->checkStatusOrders($orderId);
+            break;
         case 'wwm-orders-store':
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Method Not Allowed. POST required']);
+                exit;
+            }
             $wwmOrderController->apiStore();
             break;
         case 'get-midas-japan-orders':
@@ -150,7 +68,16 @@ if ($route === '' && isset($_GET['act'])) {
             $midasJapanOrderController->getOrders();
             break;
         case 'update-wwm-order':
-            $wwmOrderController->updateOrder($_GET['id'], $_GET['status']);
+            $input = json_decode(file_get_contents('php://input'), true) ?: [];
+            $id = $_GET['id'] ?? ($_POST['id'] ?? ($input['id'] ?? null));
+            $status = $_GET['status'] ?? ($_POST['status'] ?? ($input['status'] ?? null));
+            if ($id !== null && $status !== null) {
+                $wwmOrderController->updateOrder($id, $status);
+            } else {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'id and status required']);
+            }
             break;
         case 'check-uid-wwm':
             header('Content-Type: application/json');
@@ -180,13 +107,6 @@ if ($route === '' && isset($_GET['act'])) {
     exit;
 }
 
-if ($route !== '') {
-    header('Content-Type: application/json; charset=utf-8');
-    http_response_code(404);
-    echo json_encode(['success' => false, 'message' => 'Not Found']);
-    exit;
-}
-
 header('Content-Type: application/json; charset=utf-8');
 http_response_code(400);
-echo json_encode(['success' => false, 'message' => 'Missing act or route']);
+echo json_encode(['success' => false, 'message' => 'Missing act parameter']);

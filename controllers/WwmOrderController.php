@@ -11,6 +11,14 @@ class WwmOrderController extends WwmOrder
         echo json_encode($wwmOrders);
     }
 
+    public function checkStatusOrders($orderId)
+    {
+        header('Content-Type: application/json; charset=utf-8');
+        $wwmOrder = new WwmOrder();
+        $wwmOrders = $wwmOrder->getAllOrders($orderId);
+        echo json_encode($wwmOrders);
+    }
+
     public function add()
     {
         $products = $this->getProducts();

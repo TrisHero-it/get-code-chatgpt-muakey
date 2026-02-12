@@ -13,19 +13,72 @@ class MidasBuyJapanOrder extends db
     public function getOrdersPaginated2($page = 1, $perPage = 30)
     {
         $offset = ($page - 1) * $perPage;
-        $query = "SELECT * FROM orders";
+        // Cast to int for safety (LIMIT and OFFSET cannot use placeholders in MySQL)
+        $perPage = (int)$perPage;
+        $offset = (int)$offset;
+
+        $pdo = $this->getConnect4();
+        $query = "SELECT * FROM orders WHERE 1 = 1";
+        $params = [];
+
+        // Filter by status
+        if (isset($_GET['status']) && $_GET['status'] != '') {
+            $status = in_array($_GET['status'], ['pending', 'success', 'cancelled', 'refunded']) ? $_GET['status'] : '';
+            if ($status) {
+                $query .= " AND status = ?";
+                $params[] = $status;
+            }
+        }
+
+        // Search by order_id, uid, or card
+        if (isset($_GET['search']) && trim($_GET['search']) != '') {
+            $search = trim($_GET['search']);
+            $query .= " AND (order_id LIKE ? OR uid LIKE ? OR card LIKE ?)";
+            $searchParam = '%' . $search . '%';
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+        }
+
         $query .= " ORDER BY id DESC LIMIT $perPage OFFSET $offset";
-        return $this->getData4($query);
+
+        $stmt = $pdo->prepare($query);
+        if (!empty($params)) {
+            $stmt->execute($params);
+        } else {
+            $stmt->execute();
+        }
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getTotalCount()
     {
-        $query = "SELECT COUNT(*) as total FROM orders ";
+        $pdo = $this->getConnect4();
+        $query = "SELECT COUNT(*) as total FROM orders WHERE 1=1";
+        $params = [];
+
+        // Filter by status
         if (isset($_GET['status']) && $_GET['status'] != '') {
-            $status = in_array($_GET['status'], ['pending', 'success', 'cancelled']) ? $_GET['status'] : '';
-            if ($status) $query .= " WHERE status = '$status'";
+            $status = in_array($_GET['status'], ['pending', 'success', 'cancelled', 'refunded']) ? $_GET['status'] : '';
+            if ($status) {
+                $query .= " AND status = ?";
+                $params[] = $status;
+            }
         }
-        $result = $this->getData4($query, false);
+
+        // Search by order_id, uid, or card
+        if (isset($_GET['search']) && trim($_GET['search']) != '') {
+            $search = trim($_GET['search']);
+            $query .= " AND (order_id LIKE ? OR uid LIKE ? OR card LIKE ?)";
+            $searchParam = '%' . $search . '%';
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+            $params[] = $searchParam;
+        }
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? (int)$result['total'] : 0;
     }
 
@@ -65,5 +118,12 @@ class MidasBuyJapanOrder extends db
     {
         $query = "DELETE FROM orders WHERE id = $id";
         $this->getData4($query, false);
+    }
+
+    public function updateStatus($id, $status)
+    {
+        $pdo = $this->getConnect4();
+        $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+        $stmt->execute([$status, $id]);
     }
 }

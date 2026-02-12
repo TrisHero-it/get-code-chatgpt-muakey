@@ -145,6 +145,13 @@ class WwmOrder extends db
         return $this->getData($query);
     }
 
+    public function getAllOrders($order)
+    {
+        $query = "SELECT * FROM wwm_orders where order_id = $order";
+        return $this->getData($query, false);
+    }
+
+
     public function updateOrder($id, $status)
     {
         $pdo = $this->getConnect();
