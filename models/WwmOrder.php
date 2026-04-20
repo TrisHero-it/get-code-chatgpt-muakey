@@ -15,6 +15,23 @@ class WwmOrder extends db
     }
 
     /**
+     * Kiểm tra sales_agent_id đã tồn tại chưa
+     */
+    public function checkSalesAgentIdExists($sales_agent_id, $exclude_id = null)
+    {
+        if ($sales_agent_id === null || $sales_agent_id === '') return false;
+        $pdo = $this->getConnect();
+        if ($exclude_id !== null) {
+            $stmt = $pdo->prepare("SELECT id FROM wwm_orders WHERE sales_agent_id = ? AND id != ? LIMIT 1");
+            $stmt->execute([$sales_agent_id, (int)$exclude_id]);
+        } else {
+            $stmt = $pdo->prepare("SELECT id FROM wwm_orders WHERE sales_agent_id = ? LIMIT 1");
+            $stmt->execute([$sales_agent_id]);
+        }
+        return $stmt->fetch() ? true : false;
+    }
+
+    /**
      * Thêm bản ghi mới vào bảng wwm_orders
      */
     public function insert($order_id, $uid, $product_id, $category = '', $server = '', $region = '', $sales_agent_id = null)

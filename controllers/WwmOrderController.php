@@ -74,8 +74,8 @@ class WwmOrderController extends WwmOrder
 
         // Kiểm tra order_id đã tồn tại chưa
         $wwmOrder = new WwmOrder();
-        if ($wwmOrder->checkOrderIdExists($order_id)) {
-            header("Location: ?act=wwm-order-add&error=" . urlencode('Order ID "' . $order_id . '" đã tồn tại trong hệ thống!'));
+        if ($sales_agent_id !== null && $wwmOrder->checkSalesAgentIdExists($sales_agent_id)) {
+            header("Location: ?act=wwm-order-add&error=" . urlencode('Sales Agent ID "' . $sales_agent_id . '" đã tồn tại trong hệ thống!'));
             exit;
         }
 
@@ -222,8 +222,8 @@ class WwmOrderController extends WwmOrder
                 $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'product_id or product_name is required'];
                 continue;
             }
-            if ($wwmOrder->checkOrderIdExists($order_id)) {
-                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'Mã đơn hàng đã tồn tại'];
+            if ($sales_agent_id !== null && $wwmOrder->checkSalesAgentIdExists($sales_agent_id)) {
+                $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => 'Sales Agent ID đã tồn tại'];
                 continue;
             }
 
@@ -242,7 +242,7 @@ class WwmOrderController extends WwmOrder
                 $errors[] = ['index' => $index, 'order_id' => $order_id, 'message' => $e->getMessage()];
             }
         }
-        if (isset($errors)) {
+        if (!empty($errors)) {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
@@ -651,10 +651,9 @@ class WwmOrderController extends WwmOrder
             exit;
         }
 
-        // Kiểm tra order_id có trùng với đơn hàng khác không
-        $checkOrder = $wwmOrder->checkOrderIdExists($order_id);
-        if ($checkOrder && $existingOrder['order_id'] != $order_id) {
-            header("Location: ?act=wwm-order-edit&id={$id}&error=" . urlencode('Mã đơn hàng đã tồn tại!'));
+        // Cho phép trùng order_id, nhưng không cho trùng Sales Agent ID (loại trừ chính bản ghi đang sửa).
+        if ($sales_agent_id !== null && $wwmOrder->checkSalesAgentIdExists($sales_agent_id, $id)) {
+            header("Location: ?act=wwm-order-edit&id={$id}&error=" . urlencode('Sales Agent ID "' . $sales_agent_id . '" đã tồn tại trong hệ thống!'));
             exit;
         }
 

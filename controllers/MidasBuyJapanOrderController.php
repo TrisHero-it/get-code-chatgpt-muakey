@@ -117,9 +117,9 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
         }
 
         $order = new MidasBuyJapanOrder();
-        if ($order_id !== null && $order->checkOrderIdExists($order_id)) {
+        if ($sales_agent_id !== null && $order->checkSalesAgentIdExists($sales_agent_id)) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Mã đơn hàng (Order ID) "' . $order_id . '" đã tồn tại trong hệ thống!']);
+            echo json_encode(['success' => false, 'message' => 'Sales Agent ID "' . $sales_agent_id . '" đã tồn tại trong hệ thống!']);
             return;
         }
 
@@ -164,8 +164,8 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
             exit;
         }
 
-        if ($order_id !== null && $order->checkOrderIdExists($order_id)) {
-            header("Location: ?act=midas-japan-order-add&error=" . urlencode('Mã đơn hàng (Order ID) "' . $order_id . '" đã tồn tại trong hệ thống!'));
+        if ($sales_agent_id !== null && $order->checkSalesAgentIdExists($sales_agent_id)) {
+            header("Location: ?act=midas-japan-order-add&error=" . urlencode('Sales Agent ID "' . $sales_agent_id . '" đã tồn tại trong hệ thống!'));
             exit;
         }
 
@@ -226,6 +226,12 @@ class MidasBuyJapanOrderController extends MidasBuyJapanOrder
 
         if (strlen($card) > 30) {
             header("Location: ?act=midas-japan-order-edit&id={$id}&error=" . urlencode('Card tối đa 30 ký tự!'));
+            exit;
+        }
+
+        // Cho phép trùng order_id, nhưng không cho trùng Sales Agent ID (loại trừ chính bản ghi đang sửa).
+        if ($sales_agent_id !== null && $order->checkSalesAgentIdExists($sales_agent_id, $id)) {
+            header("Location: ?act=midas-japan-order-edit&id={$id}&error=" . urlencode('Sales Agent ID "' . $sales_agent_id . '" đã tồn tại trong hệ thống!'));
             exit;
         }
 

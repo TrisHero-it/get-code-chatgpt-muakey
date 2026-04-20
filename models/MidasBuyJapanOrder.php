@@ -100,6 +100,21 @@ class MidasBuyJapanOrder extends db
         return $stmt->fetch() ? true : false;
     }
 
+    /** Kiểm tra sales_agent_id đã tồn tại chưa (bảng orders) */
+    public function checkSalesAgentIdExists($sales_agent_id, $exclude_id = null)
+    {
+        if ($sales_agent_id === null || $sales_agent_id === '') return false;
+        $pdo = $this->getConnect4();
+        if ($exclude_id !== null) {
+            $stmt = $pdo->prepare("SELECT id FROM orders WHERE sales_agent_id = ? AND id != ? LIMIT 1");
+            $stmt->execute([$sales_agent_id, (int)$exclude_id]);
+        } else {
+            $stmt = $pdo->prepare("SELECT id FROM orders WHERE sales_agent_id = ? LIMIT 1");
+            $stmt->execute([$sales_agent_id]);
+        }
+        return $stmt->fetch() ? true : false;
+    }
+
     public function insert($uid, $card, $image = null, $status = 'pending', $order_id = null, $sales_agent_id = null)
     {
         $pdo = $this->getConnect4();
