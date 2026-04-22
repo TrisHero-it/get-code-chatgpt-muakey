@@ -1,13 +1,3 @@
-<?php if (isset($token)) {
-    if ($token == 1) {
-?>
-        <script>
-            window.location.href = 'https://2fa.muakey.com/?id=<?php echo $accountChatgpt['code'] ?>';
-        </script>;
-<?php
-        exit;
-    }
-}  ?>
 <div class="main-content">
     <div class="container mt-5">
         <!-- Table -->
