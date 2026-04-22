@@ -107,7 +107,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                     <tr id="loadingRow">
                                         <td colspan="5" class="text-center py-4">
                                             <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                            Đang tải kết quả... 
+                                            Đang tải kết quả...
                                         </td>
                                     </tr>
                                     <tr id="noResultsRow" class="d-none">
@@ -116,7 +116,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                         </td>
                                     </tr>
                                     <?php
-                                    echo "<script>(function(){window.__SEARCH_AJAX_PENDING__=0;window.__SEARCH_ROWS_SHOWN__=0;})();</script>";
+                                    echo "<script>(function(){\nwindow.__SEARCH_AJAX_PENDING__=0;\nwindow.__updateSearchStatus__=function(){\n  var loadingRow=document.getElementById('loadingRow');\n  var noRow=document.getElementById('noResultsRow');\n  var body=document.getElementById('resultsBody');\n  if(!noRow||!body) return;\n\n  // Chỉ kết luận khi mọi request đã xong\n  if((window.__SEARCH_AJAX_PENDING__||0)!==0) return;\n\n  if(loadingRow) loadingRow.classList.add('d-none');\n\n  var resultRows=body.querySelectorAll('tr[id^=\"row\"]');\n  var hasVisible=false;\n  for(var i=0;i<resultRows.length;i++){\n    var r=resultRows[i];\n    if(!r||!r.isConnected) continue;\n    if(r.style && r.style.display==='none') continue;\n    // nếu display trống thì coi như đang hiện\n    hasVisible=true;\n    break;\n  }\n\n  if(hasVisible) noRow.classList.add('d-none');\n  else noRow.classList.remove('d-none');\n};\n})();</script>";
                                     foreach ($results as $item) {
                                         $date = new DateTime($item['createdAt'], new DateTimeZone('UTC'));
                                         $date->setTimezone(new DateTimeZone('Asia/Ho_Chi_Minh'));
@@ -126,9 +126,11 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                         if ($createdAtPlus15 <= $now) {
                                             continue;
                                         } else {
+
                                             if (($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) ||
                                                 (mb_strtolower($item['to'][0]['address'], 'UTF-8') == $email && $item['from']['name'] == 'Netflix')
                                             ) {
+
                                     ?>
                                                 <tr id="row<?php echo htmlspecialchars($item['@id'], ENT_QUOTES, 'UTF-8') ?>" style="display: none;">
                                                     <td>
@@ -148,12 +150,14 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                                             url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
                                                                             method: "GET",
                                                                             headers: {
-                                                                                "Authorization": "Bearer <?php echo $token ?>"
+                                                                                "Authorization": "Bearer <?php echo $item['_token'] ?? $token ?>"
                                                                             },
                                                                             success: function(response) {
+
                                                                                 var row = document.getElementById(rowId);
                                                                                 if (!row) return;
-                                                                                var html = response.html && response.html[0];
+                                                                                var html = response && response.html;
+                                                                                if (Array.isArray(html)) html = html[0];
                                                                                 if (!html) {
                                                                                     row.remove();
                                                                                     return;
@@ -164,7 +168,6 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
 
                                                                                 if (aTag) {
                                                                                     row.style.display = '';
-                                                                                    window.__SEARCH_ROWS_SHOWN__ = (window.__SEARCH_ROWS_SHOWN__ || 0) + 1;
                                                                                     document.getElementById(codeId).innerHTML = '<a class="btn btn-primary" href=' + JSON.stringify(aTag.href) + '> Click here </a>';
                                                                                 } else {
                                                                                     row.remove();
@@ -176,19 +179,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                                                             },
                                                                             complete: function() {
                                                                                 window.__SEARCH_AJAX_PENDING__ = Math.max(0, (window.__SEARCH_AJAX_PENDING__ || 0) - 1);
-
-                                                                                var loadingRow = document.getElementById('loadingRow');
-                                                                                if (loadingRow) loadingRow.classList.add('d-none');
-
-                                                                                if ((window.__SEARCH_AJAX_PENDING__ || 0) === 0) {
-                                                                                    var noRow = document.getElementById('noResultsRow');
-                                                                                    if (!noRow) return;
-                                                                                    if ((window.__SEARCH_ROWS_SHOWN__ || 0) === 0) {
-                                                                                        noRow.classList.remove('d-none');
-                                                                                    } else {
-                                                                                        noRow.classList.add('d-none');
-                                                                                    }
-                                                                                }
+                                                                                if (typeof window.__updateSearchStatus__ === 'function') window.__updateSearchStatus__();
                                                                             }
                                                                         });
                                                                     })();
@@ -237,14 +228,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                     ?>
                                     <script>
                                         (function() {
-                                            var loadingRow = document.getElementById('loadingRow');
-                                            var noRow = document.getElementById('noResultsRow');
-                                            if (!noRow) return;
-
-                                            if ((window.__SEARCH_AJAX_PENDING__ || 0) === 0) {
-                                                if (loadingRow) loadingRow.classList.add('d-none');
-                                                if ((window.__SEARCH_ROWS_SHOWN__ || 0) === 0) noRow.classList.remove('d-none');
-                                            }
+                                            if (typeof window.__updateSearchStatus__ === 'function') window.__updateSearchStatus__();
                                         })();
                                     </script>
                                 </tbody>
