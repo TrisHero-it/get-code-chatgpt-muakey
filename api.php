@@ -3,10 +3,18 @@ require_once 'controllers/SteamController.php';
 require_once 'controllers/OrderController.php';
 require_once 'controllers/WwmOrderController.php';
 require_once 'controllers/MidasBuyJapanOrderController.php';
+require_once 'controllers/CodeController.php';
 require_once 'vendor/autoload.php';
 
 $username = 'admin';
 $password = 'Muakey@@111';
+
+// Public endpoint (không cần Basic Auth): dùng để search code mà không lộ token
+if (isset($_GET['act']) && $_GET['act'] === 'code-search') {
+    $codeController = new CodeController();
+    $codeController->apiSearch();
+    exit;
+}
 
 if (
     !isset($_SERVER['PHP_AUTH_USER']) ||

@@ -112,123 +112,97 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                     </tr>
                                     <tr id="noResultsRow" class="d-none">
                                         <td colspan="5" class="text-center py-4 text-muted">
-                                            Không có kết quả
+                                            <div>Không có kết quả</div>
                                         </td>
                                     </tr>
-                                    <?php
-                                    echo "<script>(function(){\nwindow.__SEARCH_AJAX_PENDING__=0;\nwindow.__updateSearchStatus__=function(){\n  var loadingRow=document.getElementById('loadingRow');\n  var noRow=document.getElementById('noResultsRow');\n  var body=document.getElementById('resultsBody');\n  if(!noRow||!body) return;\n\n  // Chỉ kết luận khi mọi request đã xong\n  if((window.__SEARCH_AJAX_PENDING__||0)!==0) return;\n\n  if(loadingRow) loadingRow.classList.add('d-none');\n\n  var resultRows=body.querySelectorAll('tr[id^=\"row\"]');\n  var hasVisible=false;\n  for(var i=0;i<resultRows.length;i++){\n    var r=resultRows[i];\n    if(!r||!r.isConnected) continue;\n    if(r.style && r.style.display==='none') continue;\n    // nếu display trống thì coi như đang hiện\n    hasVisible=true;\n    break;\n  }\n\n  if(hasVisible) noRow.classList.add('d-none');\n  else noRow.classList.remove('d-none');\n};\n})();</script>";
-                                    foreach ($results as $item) {
-                                        $date = new DateTime($item['createdAt'], new DateTimeZone('UTC'));
-                                        $date->setTimezone(new DateTimeZone('Asia/Ho_Chi_Minh'));
-                                        $now = new DateTime("now", new DateTimeZone('Asia/Ho_Chi_Minh'));
-                                        $createdAtPlus15 = clone $date;
-                                        $createdAtPlus15->add(new DateInterval('PT15M')); // PT15M = Plus 15 Minutes
-                                        if ($createdAtPlus15 <= $now) {
-                                            continue;
-                                        } else {
-
-                                            if (($item['from']['name'] == 'Netflix' && $item['to'][0]['address'] == $email) ||
-                                                (mb_strtolower($item['to'][0]['address'], 'UTF-8') == $email && $item['from']['name'] == 'Netflix')
-                                            ) {
-
-                                    ?>
-                                                <tr id="row<?php echo htmlspecialchars($item['@id'], ENT_QUOTES, 'UTF-8') ?>" style="display: none;">
-                                                    <td>
-                                                        <span class="badge badge-dot mr-4" style="color: green;">
-                                                            <?php
-                                                            if ($item['from']['name'] == 'Netflix' && strtolower($item['to'][0]['address']) == strtolower($email)) {
-                                                                echo "<span id='code" . htmlspecialchars($item['@id'], ENT_QUOTES, 'UTF-8') . "'></span>";
-
-                                                                $text = $item['intro'];
-                                                            ?>
-                                                                <script>
-                                                                    (function() {
-                                                                        var rowId = <?php echo json_encode('row' . $item['@id']) ?>;
-                                                                        var codeId = <?php echo json_encode('code' . $item['@id']) ?>;
-                                                                        window.__SEARCH_AJAX_PENDING__ = (window.__SEARCH_AJAX_PENDING__ || 0) + 1;
-                                                                        $.ajax({
-                                                                            url: "https://api.mail.tm" + "<?php echo $item['@id'] ?>",
-                                                                            method: "GET",
-                                                                            headers: {
-                                                                                "Authorization": "Bearer <?php echo $item['_token'] ?? $token ?>"
-                                                                            },
-                                                                            success: function(response) {
-
-                                                                                var row = document.getElementById(rowId);
-                                                                                if (!row) return;
-                                                                                var html = response && response.html;
-                                                                                if (Array.isArray(html)) html = html[0];
-                                                                                if (!html) {
-                                                                                    row.remove();
-                                                                                    return;
-                                                                                }
-                                                                                var parser = new DOMParser();
-                                                                                var doc = parser.parseFromString(html, 'text/html');
-                                                                                var aTag = doc.querySelector('a.h5[href*="netflix.com/account/travel/verify"]');
-
-                                                                                if (aTag) {
-                                                                                    row.style.display = '';
-                                                                                    document.getElementById(codeId).innerHTML = '<a class="btn btn-primary" href=' + JSON.stringify(aTag.href) + '> Click here </a>';
-                                                                                } else {
-                                                                                    row.remove();
-                                                                                }
-                                                                            },
-                                                                            error: function() {
-                                                                                var row = document.getElementById(rowId);
-                                                                                if (row) row.remove();
-                                                                            },
-                                                                            complete: function() {
-                                                                                window.__SEARCH_AJAX_PENDING__ = Math.max(0, (window.__SEARCH_AJAX_PENDING__ || 0) - 1);
-                                                                                if (typeof window.__updateSearchStatus__ === 'function') window.__updateSearchStatus__();
-                                                                            }
-                                                                        });
-                                                                    })();
-                                                                </script>
-
-                                                            <?php
-                                                            }
-                                                            ?>
-                                                        </span>
-                                                    </td>
-
-                                                    <th scope="row">
-                                                        <div class="media align-items-center">
-                                                            <a href="#" class="avatar rounded-circle mr-3">
-                                                                <img alt="Image placeholder" src="css/images/netflix.jpg">
-                                                            </a>
-                                                            <div class="media-body">
-                                                                <span class="mb-0 text-sm">Netflix</span>
-                                                            </div>
-                                                        </div>
-                                                    </th>
-
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge badge-dot mr-4" style="color: red;">
-                                                                <?php echo $item['subject'] ?>
-                                                            </span>
-                                                        </div>
-                                                    </td>
-
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <span class="badge badge-dot mr-4" style="color: black">
-                                                                <?php echo $date->format('H:i:s') ?>
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <a href="https://muakey.com/">muakey.com</a>
-                                                    </td>
-                                                </tr>
-                                    <?php
-                                            }
-                                        }
-                                    }
-                                    ?>
                                     <script>
                                         (function() {
-                                            if (typeof window.__updateSearchStatus__ === 'function') window.__updateSearchStatus__();
+                                            var email = <?php echo json_encode($email ?? '') ?>;
+                                            var body = document.getElementById('resultsBody');
+                                            var loadingRow = document.getElementById('loadingRow');
+                                            var noRow = document.getElementById('noResultsRow');
+                                            if (!body || !loadingRow || !noRow || !email) return;
+
+                                            function setLoading(v) {
+                                                if (v) loadingRow.classList.remove('d-none');
+                                                else loadingRow.classList.add('d-none');
+                                            }
+
+                                            function setNo(v) {
+                                                if (v) noRow.classList.remove('d-none');
+                                                else noRow.classList.add('d-none');
+                                            }
+
+                                            function clearData() {
+                                                var rows = body.querySelectorAll('tr.data-row');
+                                                for (var i = 0; i < rows.length; i++) rows[i].remove();
+                                            }
+
+                                            function esc(s) {
+                                                return String(s || '').replace(/[&<>"']/g, function(c) {
+                                                    return ({
+                                                        '&': '&amp;',
+                                                        '<': '&lt;',
+                                                        '>': '&gt;',
+                                                        '"': '&quot;',
+                                                        "'": '&#39;'
+                                                    })[c];
+                                                });
+                                            }
+
+                                            function append(item) {
+                                                var tr = document.createElement('tr');
+                                                tr.className = 'data-row';
+                                                var createdAt = item.createdAt || '';
+                                                var timeText = '';
+                                                try {
+                                                    var d = new Date(createdAt);
+                                                    if (!isNaN(d.getTime())) timeText = d.toLocaleTimeString('vi-VN', {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        second: '2-digit'
+                                                    });
+                                                } catch (e) {}
+
+                                                tr.innerHTML =
+                                                    '<td><a class="btn btn-primary" target="_blank" rel="noopener noreferrer" href="' + esc(item.verifyLink || '#') + '">Click here</a></td>' +
+                                                    '<th scope="row"><div class="media align-items-center"><a href="#" class="avatar rounded-circle mr-3"><img alt="Image placeholder" src="css/images/netflix.jpg"></a><div class="media-body"><span class="mb-0 text-sm">Netflix</span></div></div></th>' +
+                                                    '<td><div class="d-flex align-items-center"><span class="badge badge-dot mr-4" style="color: red;">' + esc(item.subject || '') + '</span></div></td>' +
+                                                    '<td><div class="d-flex align-items-center"><span class="badge badge-dot mr-4" style="color: black">' + esc(timeText) + '</span></div></td>' +
+                                                    '<td><a href="https://muakey.com/">muakey.com</a></td>';
+                                                body.appendChild(tr);
+                                            }
+
+                                            setNo(false);
+                                            clearData();
+                                            setLoading(true);
+
+                                            $.ajax({
+                                                url: 'api.php',
+                                                method: 'GET',
+                                                dataType: 'json',
+                                                data: {
+                                                    act: 'code-search',
+                                                    email: email
+                                                },
+                                                success: function(res) {
+                                                    clearData();
+                                                    var data = res && res.data;
+                                                    if (!Array.isArray(data) || data.length === 0) {
+                                                        setNo(true);
+                                                        return;
+                                                    }
+                                                    for (var i = 0; i < data.length; i++) append(data[i]);
+                                                    setNo(false);
+                                                },
+                                                error: function() {
+                                                    clearData();
+                                                    setNo(true);
+                                                },
+                                                complete: function() {
+                                                    setLoading(false);
+                                                }
+                                            });
                                         })();
                                     </script>
                                 </tbody>
