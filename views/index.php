@@ -1,11 +1,20 @@
 <div class="main-content">
     <div class="container mt-5">
         <!-- Table -->
+        <?php function e($value)
+        {
+            return htmlspecialchars((string)$value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        }
+
+        $email = trim($_GET['email'] ?? '');
+
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            exit('Email không hợp lệ');
+        } ?>
         <div class="d-flex justify-content-between">
-            <?php if (($_GET['email'])) {
-                $email = strtolower($_GET['email']);
-            } ?>
-            <h2 class="mb-5">Nhận code : <span style="color: red;"><?php echo $email ?? 'Vui lòng điền email để lấy code ' ?></span></h2>
+
+            <h2 class="mb-5">Nhận code : <span style="color: red;"><?php echo e($email) ?? 'Vui lòng điền email để lấy code ' ?></span></h2>
 
 
             <!-- Button trigger modal -->
@@ -67,7 +76,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
     echo "<script>
                 setTimeout(function() {
                     document.getElementById('click').click();
-                }, 100);
+                }, 300);
             </script>";
 }
 ?>
@@ -107,7 +116,7 @@ if (!isset($_GET['email']) || $_GET['email'] == '') {
                                     </tr>
                                     <script>
                                         (function() {
-                                            var email = <?php echo json_encode($email ?? '') ?>;
+                                            var email = <?php echo json_encode($email, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
                                             var body = document.getElementById('resultsBody');
                                             var loadingRow = document.getElementById('loadingRow');
                                             var noRow = document.getElementById('noResultsRow');

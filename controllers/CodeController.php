@@ -51,6 +51,18 @@ class CodeController extends Account
         header('Content-Type: application/json; charset=utf-8');
 
         $emailParam = $_GET['email'] ?? '';
+        $email = $_GET['email'] ?? '';
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid email']);
+            exit;
+        }
+        if (!filter_var($emailParam, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Invalid email']);
+            exit;
+        }
         $email = mb_strtolower(trim($emailParam), 'UTF-8');
         if ($email === '') {
             http_response_code(400);
@@ -171,7 +183,7 @@ class CodeController extends Account
                 continue;
             }
 
-            if ($createdAt < $cutoff) continue;
+            // if ($createdAt < $cutoff) continue;
 
             $verifyLink = $this->extractNetflixVerifyLink($tokenForItem, $messageId);
             if (!$verifyLink) continue;
