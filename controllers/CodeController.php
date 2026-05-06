@@ -58,7 +58,7 @@ class CodeController extends Account
             echo json_encode(['success' => false, 'message' => 'Invalid email']);
             exit;
         }
-        if (!filter_var($emailParam, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($emailParam , FILTER_VALIDATE_EMAIL)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Invalid email']);
             exit;

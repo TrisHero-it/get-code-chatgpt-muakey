@@ -4,7 +4,9 @@ require_once 'controllers/OrderController.php';
 require_once 'controllers/WwmOrderController.php';
 require_once 'controllers/MidasBuyJapanOrderController.php';
 require_once 'controllers/CodeController.php';
+require_once 'controllers/MidasBuyTokenOrderController.php';
 require_once 'vendor/autoload.php';
+
 
 $username = 'admin';
 $password = 'Muakey@@111';
@@ -31,6 +33,7 @@ if (
 
 $steamController = new SteamController();
 $wwmOrderController = new WwmOrderController();
+$midasBuyTokenOrderController = new MidasBuyTokenOrderController();
 
 // Xử lý theo ?act=
 if (isset($_GET['act'])) {
@@ -125,6 +128,32 @@ if (isset($_GET['act'])) {
             echo curl_exec($ch);
             curl_close($ch);
             break;
+        case "add-midasbuy-token-orders":
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Method Not Allowed. POST required']);
+                exit;
+            }
+            $midasBuyTokenOrderController->storeOrder($_POST);
+            header("location: index.php?act=midas-token-orders");
+            break;
+        case "update-midasbuy-token-orders":
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(405);
+                echo json_encode(['success' => false, 'message' => 'Method Not Allowed. POST required']);
+                exit;
+            }
+            $midasBuyTokenOrderController->storeOrder($_POST);
+            header("location: index.php?act=midas-token-orders");
+            break;
+        case "get-midas-token-orders":
+            header('Content-Type: application/json; charset=utf-8');
+            $order = $midasBuyTokenOrderController->getOrderPending();
+            echo json_encode($order);
+            break;
+
         default:
             header('Content-Type: application/json; charset=utf-8');
             http_response_code(404);

@@ -23,10 +23,12 @@
     require_once 'controllers/MidasBuyAccountController.php';
     require_once 'controllers/MidasBuyOrderController.php';
     require_once 'controllers/MidasBuyJapanOrderController.php';
+    require_once 'controllers/MidasBuyTokenOrderController.php';
     require_once 'vendor/autoload.php';
     $codeController = new CodeController();
     $steamController = new SteamController();
     $wwmOrderController = new WwmOrderController();
+    $midasBuyTokenOrderController = new MidasBuyTokenOrderController();
     if (isset($_GET['act'])) {
         // Xác thực HTTP Basic Authentication
         $username = 'admin';
@@ -759,6 +761,105 @@
                 $midasJapanOrderController = new MidasBuyJapanOrderController();
                 $midasJapanOrderController->refund($_GET['id']);
                 break;
+            case 'midas-token-orders':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasBuyTokenOrderController->index();
+                break;
+
+            case 'add-midas-token-orders':
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasBuyTokenOrderController->add();
+                break;
+            case "edit-midas-token-order":
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasBuyTokenOrderController->edit($_GET['id']);
+
+                break;
+            case "delete-midas-token-order":
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $midasBuyTokenOrderController->deleteOrder($_GET['id']);
+                header("location: index.php?act=midas-token-orders");
+                break;
+            case "update-midas-token-order":
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+
+
+                $midasBuyTokenOrderController->update($_GET['id'], $_POST);
+
+                header("location: ?act=midas-token-orders");
+                break;
+            case "token-midasbuy-codes":
+                if (
+                    !isset($_SERVER['PHP_AUTH_USER']) ||
+                    !isset($_SERVER['PHP_AUTH_PW']) ||
+                    $_SERVER['PHP_AUTH_USER'] !== $username ||
+                    $_SERVER['PHP_AUTH_PW'] !== $password
+                ) {
+                    header('WWW-Authenticate: Basic realm="Admin Area"');
+                    header('HTTP/1.0 401 Unauthorized');
+                    echo '<h1>Unauthorized Access</h1>';
+                    echo '<p>You need to provide valid credentials to access this area.</p>';
+                    exit;
+                }
+                $codeController->index();
+
+                break;
+
             default:
                 $codeController->index();
                 break;

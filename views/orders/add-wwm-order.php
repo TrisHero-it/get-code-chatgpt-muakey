@@ -24,9 +24,9 @@
         </div>
 
         <!-- Hidden fields để lưu giá trị đã parse -->
-        <input type="hidden" id="order_id" name="order_id" value="">
-        <input type="hidden" id="uid" name="uid" value="">
-        <input type="hidden" id="product_id" name="product_id" value="">
+        <input type="text" id="order_id" name="order_id" value="">
+        <input type="text" id="uid" name="uid" value="">
+        <input type="text" id="product_id" name="product_id" value="">
         <input type="hidden" id="category" name="category" value="">
         <input type="hidden" id="server" name="server" value="">
         <input type="hidden" id="region" name="region" value="">
@@ -197,9 +197,15 @@
             try {
                 const res = await fetch('api.php?act=check-uid-wwm&uid=' + encodeURIComponent(uid));
                 const data = await res.json();
-                return data && data.code === '0206' ? { valid: false } : { valid: true };
+                return data && data.code === '0206' ? {
+                    valid: false
+                } : {
+                    valid: true
+                };
             } catch (e) {
-                return { valid: false };
+                return {
+                    valid: false
+                };
             }
         }
 
@@ -215,11 +221,11 @@
                     uidElement.style.fontWeight = '';
                     if (uidCheckResult && parsed.category && parsed.category.toLowerCase() === 'where winds meet') {
                         uidCheckSpan.style.display = 'inline';
-                        uidCheckSpan.innerHTML = uidCheckResult.valid === false
-                            ? '<span class="badge bg-danger">UID không tồn tại</span>'
-                            : uidCheckResult.valid === true
-                                ? '<span class="badge bg-success">UID hợp lệ</span>'
-                                : '<span class="badge bg-secondary">Đang kiểm tra...</span>';
+                        uidCheckSpan.innerHTML = uidCheckResult.valid === false ?
+                            '<span class="badge bg-danger">UID không tồn tại</span>' :
+                            uidCheckResult.valid === true ?
+                            '<span class="badge bg-success">UID hợp lệ</span>' :
+                            '<span class="badge bg-secondary">Đang kiểm tra...</span>';
                     } else {
                         uidCheckSpan.style.display = 'none';
                     }
@@ -294,7 +300,9 @@
                 let uidCheckResult = null;
                 const isWwm = parsed.category && parsed.category.toLowerCase() === 'where winds meet';
                 if (isWwm && parsed.uid && isValidUid(parsed.uid)) {
-                    updatePreview(parsed, { valid: null });
+                    updatePreview(parsed, {
+                        valid: null
+                    });
                     uidCheckResult = await checkUidWwmApi(parsed.uid);
                     uidApiValid = uidCheckResult.valid;
                 } else {

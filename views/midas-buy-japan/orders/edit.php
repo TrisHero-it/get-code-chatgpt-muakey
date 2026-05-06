@@ -28,14 +28,6 @@
         </div>
         <div class="form-group mt-3">
             <label for="image">Image</label>
-            <?php if (!empty($order['image'])): ?>
-                <div class="mb-2">
-                    <small class="text-muted">Ảnh hiện tại:</small><br>
-                    <a href="<?php echo htmlspecialchars($order['image']) ?>" target="_blank" class="btn btn-sm btn-outline-primary">
-                        <i class="fas fa-eye"></i> Xem ảnh hiện tại
-                    </a>
-                </div>
-            <?php endif; ?>
             <input type="file" class="form-control" id="image" name="image" accept="image/*">
             <small class="form-text text-muted">Chọn file ảnh mới để thay thế (để trống nếu giữ nguyên ảnh hiện tại)</small>
         </div>
